@@ -179,7 +179,6 @@ class Bilibili {
     if (res instanceof Error) {
       return res;
     }
-    console.log(res);
 
     const parsedResult: ParsedResult = {
       roomID: this.roomID,
@@ -199,8 +198,6 @@ class Bilibili {
         }
       }
     }
-
-    console.log(parsedResult);
 
     return parsedResult;
   }

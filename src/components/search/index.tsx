@@ -24,8 +24,16 @@ const Search = () => {
   const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
     createSignal(false);
 
+  const resetParseResult = () => setParsedResult(undefined);
+  const resetInput = () => setInput("");
+
   const selectPlatform = (value: Platform) => {
+    if (currentPlatform() === value) return;
+
+    if (currentPlatform()) resetInput();
+
     setCurrentPlatform(value);
+    resetParseResult();
   };
 
   const buttons = children(() => (
@@ -82,6 +90,7 @@ const Search = () => {
         <Space.Compact>
           <Input
             placeholder="输入房间号或直播间链接"
+            value={input()}
             onInput={(v) => setInput(v)}
             disabled={loading()}
           />

@@ -21,7 +21,7 @@ const Result = (
 
   const [links, setLinks] = createStore<string[]>([]);
 
-  createEffect(() => props.links && setLinks(props.links));
+  createEffect(() => setLinks(props.links ?? []));
 
   const onPlay = async (index: number) => {
     await play(props.links[index]);
