@@ -107,10 +107,7 @@ const Search = () => {
           {buttons()}
         </Space>
 
-        <Result
-          {...parsedResult()!}
-          roomURL={`${platforms[currentPlatform()!].roomBaseURL}${input()}`}
-        />
+        <Result {...parsedResult()!} />
       </Flex>
 
       <Dialog

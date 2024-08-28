@@ -14,8 +14,9 @@ import { createStore } from "solid-js/store";
 import { insertHistory, open, play } from "~/command";
 import { AppContext } from "~/context";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { platforms } from "~/parser";
 
-const Result = (props: ParsedResult & { roomURL: string }) => {
+const Result = (props: ParsedResult) => {
   const [{ refetchHistoryItems }] = useContext(AppContext)!;
 
   const [links, setLinks] = createStore<string[]>([]);
@@ -52,7 +53,9 @@ const Result = (props: ParsedResult & { roomURL: string }) => {
               shape="circle"
               size="small"
               type="plain"
-              onClick={() => open(props.roomURL)}
+              onClick={() =>
+                open(platforms[props.platform].roomBaseURL + props.roomID)
+              }
             />
           </Tooltip>
         </Space>
