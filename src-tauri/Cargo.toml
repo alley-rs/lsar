@@ -14,7 +14,6 @@ tauri-build = { version = "2.0.0-rc", features = [] }
 
 [dependencies]
 tauri = { version = "2.0.0-rc", features = [] }
-tauri-plugin-shell = "2.0.0-rc"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["macros"] }
@@ -40,6 +39,9 @@ reqwest = { version = "0", features = ["json"] }
 toml = "0"
 open = "5"
 
+tauri-plugin-shell = "2.0.0-rc"
+tauri-plugin-clipboard-manager = "2.0.0-rc"
+
 [profile.release]
 panic = "abort"
 codegen-units = 1
@@ -49,3 +51,4 @@ strip = true
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2.0.0-rc"
+tauri-plugin-updater = "2.0.0-rc"
