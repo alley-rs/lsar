@@ -5,18 +5,12 @@ import { platforms } from "~/parser";
 import Result from "./result";
 import { AiOutlineCheck } from "solid-icons/ai";
 import { AppContext } from "~/context";
+import BiliCookieEditor from "./bili-cookie";
 
 const Dialog = lazy(() => import("alley-components/lib/components/dialog"));
 
-// const platforms = [
-//   { value: "douyu", label: "斗鱼" },
-//   { value: "huya", label: "虎牙" },
-//   { value: "douyin", label: "抖音" },
-//   { value: "bilibili", label: "B 站" },
-// ];
-
 const Search = () => {
-  const { setToast } = useContext(AppContext)![1];
+  const [_, { setToast }, { config }] = useContext(AppContext)!;
 
   const [input, setInput] = createSignal("");
   const [currentPlatform, setCurrentPlatform] = createSignal<Platform | null>(
@@ -26,6 +20,9 @@ const Search = () => {
   const [parseResult, setParsedResult] = createSignal<ParsedResult>();
 
   const [loading, setLoading] = createSignal(false);
+
+  const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
+    createSignal(false);
 
   const selectPlatform = (value: Platform) => {
     setCurrentPlatform(value);
@@ -48,52 +45,75 @@ const Search = () => {
     </For>
   ));
 
+  const onParse = async () => {
+    setLoading(true);
+
+    const platform = currentPlatform();
+
+    let result: ParsedResult | Error | undefined;
+
+    if (platform === "bilibili") {
+      if (!config()?.platform.bilibili.cookie.length) {
+        setShowBilibiliCookieEditor(true);
+      } else {
+        result = await platforms.bilibili.parser(
+          input(),
+          config()!.platform.bilibili.cookie,
+        );
+      }
+    } else {
+      result = await platforms[platform!].parser(input());
+    }
+
+    if (result instanceof Error) {
+      setToast({ type: "error", message: result.message });
+      setLoading(false);
+      return;
+    }
+
+    setParsedResult(result);
+
+    setLoading(false);
+  };
+
   return (
-    <Flex id="search" direction="vertical">
-      <Space.Compact>
-        <Input
-          placeholder="输入房间号或直播间链接"
-          onInput={(v) => setInput(v)}
-          disabled={loading()}
-        />
-        <Button
-          icon={<AiOutlineCheck />}
-          isLoading={loading()}
-          disabled={!currentPlatform() || !input().length}
-          onClick={async () => {
-            setLoading(true);
+    <>
+      <Flex id="search" direction="vertical">
+        <Space.Compact>
+          <Input
+            placeholder="输入房间号或直播间链接"
+            onInput={(v) => setInput(v)}
+            disabled={loading()}
+          />
+          <Button
+            icon={<AiOutlineCheck />}
+            isLoading={loading()}
+            disabled={!currentPlatform() || !input().length}
+            onClick={onParse}
+          />
+        </Space.Compact>
 
-            const result = await platforms[currentPlatform()!].parser(input());
-            if (result instanceof Error) {
-              setToast({ type: "error", message: result.message });
-              setLoading(false);
-              return;
-            }
+        <Space gap={8} style={{ "margin-top": "1rem" }}>
+          {buttons()}
+        </Space>
 
-            setParsedResult(result);
-            setLoading(false);
-          }}
-        />
-      </Space.Compact>
-
-      <Space gap={8} style={{ "margin-top": "1rem" }}>
-        {buttons()}
-      </Space>
-
-      <Dialog
-        class="parsed-result-dialog"
-        show={!!parseResult()}
-        onClose={() => setParsedResult(undefined)}
-        maskClosable={false}
-        showCloseIcon
-      >
         <Result
           {...parseResult()!}
           roomURL={`${platforms[currentPlatform()!].roomBaseURL}${input()}`}
           platform={currentPlatform()!}
         />
+      </Flex>
+
+      <Dialog
+        class="bili-cookie-dialog"
+        title="输入 B 站 cookie"
+        show={showBilibiliCookieEditor()}
+        onClose={() => setShowBilibiliCookieEditor(false)}
+        maskClosable={false}
+      >
+        <BiliCookieEditor onCancel={() => setShowBilibiliCookieEditor(false)} />
       </Dialog>
-    </Flex>
+    </>
   );
 };
 

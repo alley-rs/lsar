@@ -5,4 +5,5 @@ interface Player {
 
 interface Config {
   player: Player;
+  platform: { bilibili: { cookie: string } };
 }

@@ -53,7 +53,7 @@ const cdn = {
 
 const log_prefix = "huya";
 
-export class Huya {
+class Huya {
   roomID = 0;
   baseURL = "https://m.huya.com/";
   private pageURL = "";

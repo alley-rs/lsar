@@ -1,14 +1,8 @@
+import bilibili from "./bilibili";
 import douyu from "./douyu";
 import huya from "./huya";
 
-export const platforms: Record<
-  Platform,
-  {
-    label: string;
-    roomBaseURL: string;
-    parser: (input: string) => Promise<Error | ParsedResult | undefined>;
-  }
-> = {
+export const platforms = {
   douyu: {
     label: "斗鱼",
     roomBaseURL: "https://www.douyu.com/",
@@ -19,7 +13,16 @@ export const platforms: Record<
     roomBaseURL: "https://www.huya.com/",
     parser: huya,
   },
-};
+  bilibili: {
+    label: "B 站",
+    roomBaseURL: "https://live.bilibili.com/",
+    parser: bilibili,
+  },
+  douyin: {
+    label: "抖音",
+    roomBaseURL: "https://live.douyin.com/",
+  },
+} as const;
 //   {
 //     value: "douyu",
 //     label: "斗鱼",

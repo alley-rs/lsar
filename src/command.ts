@@ -33,6 +33,8 @@ export const post = async <T extends string | object>(
 ) => invoke<T>("post", { url, body, contentType });
 
 export const readConfigFile = async () => invoke<Config>("read_config_file");
+export const writeConfigFile = async (config: Config) =>
+  invoke<void>("write_config_file", { config });
 
 export const play = async (url: string) => invoke<void>("play", { url });
 

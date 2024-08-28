@@ -9,13 +9,15 @@
 }
 
 .parsed-result {
-  background-color: rgba($color: #000000, $alpha: 0.6);
+  background-color: rgba($color: #000000, $alpha: 0.2);
   backdrop-filter: blur(5px);
   border-radius: 16px;
   padding: 5px 10px;
-  width: 300px;
+  width: 440px;
+  min-height: 440px;
   color: #fff;
   box-shadow: var(--alley-box-shadow-secondary);
+  margin-top: 20px;
 
   .alley-button {
     --alley-color-button-text: #fff;
@@ -23,6 +25,15 @@
     &-plain:hover:not(:disabled) {
       color: #fff;
       background: var(--alley-color-primary);
+    }
+  }
+
+  .parsed-links {
+    .link {
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }
@@ -34,5 +45,11 @@
     top: 20px;
     color: #fff;
     z-index: 99;
+  }
+}
+
+.bili-cookie-dialog {
+  textarea {
+    width: 480px;
   }
 }

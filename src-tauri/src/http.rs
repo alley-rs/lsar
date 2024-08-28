@@ -9,6 +9,8 @@ use crate::error::LsarResult;
 
 #[tauri::command]
 pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Value> {
+    debug!(message = "发送 GET 请求", url = url);
+
     let client = reqwest::Client::new();
 
     let mut header = HeaderMap::new();
@@ -16,7 +18,10 @@ pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Va
         header.insert(k.parse::<HeaderName>().unwrap(), v.parse().unwrap());
     });
 
-    let resp = client.get(url).headers(header).send().await?;
+    let resp = client.get(url).headers(header).send().await.map_err(|e| {
+        error!(message = "发送请求时失败", error = ?e);
+        e
+    })?;
     if let Some(ct) = resp.headers().get("content-type") {
         if ct.to_str().unwrap().contains("json") {
             let v: Value = resp.json().await.map_err(|e| {

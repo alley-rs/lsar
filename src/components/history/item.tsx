@@ -8,7 +8,7 @@ import {
 } from "alley-components";
 import { AiFillChrome, AiFillDelete, AiFillPlayCircle } from "solid-icons/ai";
 import { createSignal, useContext } from "solid-js";
-import { deleteHistoryByID, open, play } from "~/command";
+import { deleteHistoryByID, open, play, readConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import { platforms } from "~/parser";
 
@@ -26,6 +26,28 @@ const HistoryItem = (props: HistoryItemProps) => {
   const onDelete = async () => {
     await deleteHistoryByID(props.id);
     props.onDelete();
+  };
+
+  const onParse = async () => {
+    setParsing(true);
+
+    if (props.platform === "bilibili") {
+      const config = await readConfigFile();
+      console.log(config);
+    }
+
+    // const r = await platforms[props.platform].parser(props.room_id.toString());
+    // if (r instanceof Error) {
+    //   setToast({ type: "error", message: r.message });
+    // } else if (r) {
+    //   play(r.links[0]);
+    //   setToast({
+    //     type: "success",
+    //     message: "已创建播放器进程，请等待 1~3 秒播放器发起网络请求",
+    //   });
+    // }
+
+    setParsing(false);
   };
 
   return (
@@ -52,24 +74,7 @@ const HistoryItem = (props: HistoryItemProps) => {
               type="plain"
               shape="circle"
               size="small"
-              onClick={async () => {
-                setParsing(true);
-                const r = await platforms[props.platform].parser(
-                  props.room_id.toString(),
-                );
-                if (r instanceof Error) {
-                  setToast({ type: "error", message: r.message });
-                } else if (r) {
-                  play(r.links[0]);
-                  setToast({
-                    type: "success",
-                    message:
-                      "已创建播放器进程，请等待 1~3 秒播放器发起网络请求",
-                  });
-                }
-
-                setParsing(false);
-              }}
+              onClick={onParse}
             />
           </Tooltip>
 
