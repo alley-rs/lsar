@@ -5,6 +5,7 @@ import History from "./components/history";
 import Search from "./components/search";
 import { AppContext } from "./context";
 import { Toast } from "alley-components";
+import Settings from "./components/settings";
 
 const App = () => {
   const [items, { refetch: refetchHistoryItems }] =
@@ -32,6 +33,8 @@ const App = () => {
         </Show>
 
         <Search />
+
+        <Settings />
       </AppContext.Provider>
 
       <Toast
