@@ -67,7 +67,7 @@ pub async fn get_all_history() -> LsarResult<Vec<HistoryItem>> {
     let rows: Vec<(i64, i8, i64, String, String, String, time::OffsetDateTime)> = sqlx::query_as(
         "select id, platform, room_id, anchor, category, last_title, last_play_time
 from history
-order by last_play_time;",
+order by last_play_time desc;",
     )
     .fetch_all(pool)
     .await
@@ -128,6 +128,19 @@ pub async fn insert_a_history(history: HistoryItem) -> LsarResult<()> {
             })?;
 
     if row.0 > 0 {
+        // 更新标题、分类、播放时间
+        sqlx::query(
+            "update history set category = ?, last_title = ?, last_play_time = ? where platform = ? and room_id = ?",
+        )
+        .bind(history.category())
+        .bind(history.last_title())
+        .bind(history.last_play_time())
+        .bind(history.platform().as_i64())
+        .bind(history.room_id())
+        .execute(pool)
+        .await?;
+
+        info!(message = "已更新记录", id = row.0);
         return Ok(());
     }
 
