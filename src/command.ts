@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 
-export const creataTable = async () => invoke<void>("create_table");
 export const getAllHistory = async () =>
   invoke<HistoryItem[]>("get_all_history");
 export const computeMD5 = async (text: string) =>

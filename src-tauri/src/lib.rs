@@ -18,7 +18,7 @@ use tracing::Level;
 use tracing_subscriber::fmt::time::OffsetTime;
 
 use crate::config::{init_config_file, read_config_file, write_config_file};
-use crate::db::{create_table, delete_a_history_by_id, get_all_history, insert_a_history};
+use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 #[cfg(all(desktop, not(debug_assertions)))]
 use crate::global::APP_CONFIG_DIR;
 use crate::http::{get, post};
@@ -117,7 +117,6 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            create_table,
             get_all_history,
             insert_a_history,
             delete_a_history_by_id,

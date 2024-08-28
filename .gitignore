@@ -2,3 +2,4 @@ node_modules
 dist
 bun.lockb
 *.db
+.DS_Store

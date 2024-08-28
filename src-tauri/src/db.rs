@@ -15,7 +15,7 @@ async fn get_global_pool() -> &'static SqlitePool {
 
             info!("数据库地址: {}", uri);
 
-            SqlitePoolOptions::new()
+            let pool = SqlitePoolOptions::new()
                 .max_connections(5)
                 .connect(&uri)
                 .await
@@ -23,7 +23,11 @@ async fn get_global_pool() -> &'static SqlitePool {
                     error!(message = "数据库连接池中获取链接失败", error = ?e);
                     e
                 })
-                .unwrap()
+                .unwrap();
+
+            create_history_table(&pool).await.unwrap();
+
+            pool
         })
         .await
 }
@@ -48,17 +52,6 @@ async fn create_history_table(pool: &SqlitePool) -> LsarResult<()> {
     })?;
 
     info!(message = "已创建表格（如果表格不存在）", table = "history");
-
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn create_table() -> LsarResult<()> {
-    trace!(message = "创建表格");
-
-    let pool = get_global_pool().await;
-
-    create_history_table(pool).await?;
 
     Ok(())
 }
