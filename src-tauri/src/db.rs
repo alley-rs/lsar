@@ -1,7 +1,7 @@
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use tokio::sync::OnceCell;
 
-use crate::{error::LsarResult, history::HistoryItem};
+use crate::{error::LsarResult, global::APP_CONFIG_DIR, history::HistoryItem};
 
 type SqlitePool = Pool<Sqlite>;
 
@@ -10,9 +10,14 @@ static SQLITE_POOL: OnceCell<SqlitePool> = OnceCell::const_new();
 async fn get_global_pool() -> &'static SqlitePool {
     SQLITE_POOL
         .get_or_init(|| async {
+            let db_path = APP_CONFIG_DIR.join("lsar.db");
+            let uri = format!("{}?mode=rwc", db_path.display());
+
+            info!("数据库地址: {}", uri);
+
             SqlitePoolOptions::new()
                 .max_connections(5)
-                .connect("./lsar.db?mode=rwc")
+                .connect(&uri)
                 .await
                 .map_err(|e| {
                     error!(message = "数据库连接池中获取链接失败", error = ?e);
