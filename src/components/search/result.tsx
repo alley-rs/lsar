@@ -13,6 +13,7 @@ import { createEffect, For, Show, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { insertHistory, open, play } from "~/command";
 import { AppContext } from "~/context";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
 const Result = (
   props: ParsedResult & { roomURL: string; platform: Platform },
@@ -100,6 +101,7 @@ const Result = (
                       shape="circle"
                       size="small"
                       type="plain"
+                      onClick={() => writeText(link)}
                     />
                   </Tooltip>
                 </Col>
