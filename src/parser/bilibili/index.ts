@@ -83,7 +83,9 @@ class Bilibili {
   private async verifyCookie() {
     debug(log_prefix, "验证 cookie");
     const url = "https://api.bilibili.com/x/web-interface/nav";
-    const data = await get<VerifyResult>(url, { cookie: this.cookie });
+    const { body: data } = await get<VerifyResult>(url, {
+      cookie: this.cookie,
+    });
     // const data: VerifyResult = await resp.json();
     if (data.code !== 0) {
       return Error(data.message);
@@ -130,7 +132,7 @@ class Bilibili {
   }
 
   private async getRoomInfo() {
-    const html = await get<string>(this.pageURL, {
+    const { body: html } = await get<string>(this.pageURL, {
       Host: "live.bilibili.com",
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
@@ -163,7 +165,7 @@ class Bilibili {
       this.category = this.parseCategory(html);
     }
 
-    const body = await get<Response>(this.roomURL, { cookie: this.cookie });
+    const { body } = await get<Response>(this.roomURL, { cookie: this.cookie });
     if (body.code !== 0) {
       return Error(body.message);
     }

@@ -100,7 +100,7 @@ pub fn run() {
 
             #[cfg(target_os = "macos")]
             {
-                use window_vibrancy::apply_blur;
+                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
                 apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
                     .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");

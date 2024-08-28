@@ -71,6 +71,7 @@ const Search = () => {
       }
     } else {
       result = await platforms[platform!].parser(input());
+      console.log(result)
     }
 
     if (result instanceof Error) {

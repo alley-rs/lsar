@@ -30,20 +30,6 @@ interface Info {
 //   };
 // }
 
-const infoString = (info: Info): string => {
-  const {
-    error,
-    msg,
-    data: { rtmp_url, rtmp_live },
-  } = info;
-  return JSON.stringify({
-    error,
-    msg,
-    rtmp_url,
-    rtmp_live,
-  });
-};
-
 const NOT_LIVING_STATE = "房间未开播";
 const INVALID_REQUEST = "非法请求";
 
@@ -52,7 +38,7 @@ class Douyu {
 
   private isPost = true;
   private ub98484234Reg = new RegExp(
-    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/
+    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/,
   );
   private finalRoomID = 0;
   private signFunc = "";
@@ -85,10 +71,10 @@ class Douyu {
 
   async getRoomInfo(params: string): Promise<Info | null | Error> {
     let url = "";
-    let resp: object | undefined;
+    let resp: Response<Info>;
     if (this.isPost) {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.finalRoomID}`;
-      resp = await post<object>(url, params);
+      resp = await post(url, params);
 
       if (!resp) {
         warn(log_prefix, "POST 请求未功能获得响应，更换 GET 请求重试");
@@ -96,18 +82,16 @@ class Douyu {
       }
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.finalRoomID}?${params}`;
-      resp = await get<object>(url);
+      resp = await get(url);
       if (!resp) {
         warn(log_prefix, "GET 请求未功能获得响应，更换 POST 请求重试");
         return null;
       }
     }
 
-    const info = resp as Info;
+    const info = resp.body;
 
-    debug("有效响应体：", infoString(info));
-
-    if ("error" in info) {
+    if ("error" in resp) {
       if (info.msg === NOT_LIVING_STATE) {
         error(log_prefix, `${this.roomID} ${NOT_LIVING_STATE}`);
         return Error(`${this.roomID} ${NOT_LIVING_STATE}`);
@@ -153,7 +137,7 @@ class Douyu {
     const md5 = await computeMD5(`${this.finalRoomID}${did}${ts}${v[0]}`);
     signFunc = signFunc.replace(
       /CryptoJS\.MD5\(cb\)\.toString\(\)/,
-      `"${md5}"`
+      `"${md5}"`,
     );
     signFunc = `${signFunc.split("return rt;})")[0]}return rt;})`;
     trace(log_prefix, signFunc);
@@ -177,7 +161,7 @@ class Douyu {
         info(log_prefix, `在网页中解析到最终房间 id：${this.finalRoomID}`);
       } else {
         const closed = html.match(
-          /<span><p>您观看的房间已被关闭，请选择其他直播进行观看哦！<\/p><\/span>/
+          /<span><p>您观看的房间已被关闭，请选择其他直播进行观看哦！<\/p><\/span>/,
         );
         if (closed) {
           return Error("您观看的房间已被关闭，请选择其他直播进行观看哦！");
@@ -193,9 +177,8 @@ class Douyu {
       this.title = title![1];
 
       const category = html.match(
-        /<span class="Title-categoryArrow"><\/span><a class="Title-categoryItem" href=".+?" target="_blank" title="(.+?)">/
+        /<span class="Title-categoryArrow"><\/span><a class="Title-categoryItem" href=".+?" target="_blank" title="(.+?)">/,
       );
-      console.log(category);
       this.category = category![1];
     }
 
@@ -241,7 +224,7 @@ class Douyu {
       if (!info) {
         error(
           log_prefix,
-          "更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序"
+          "更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序",
         );
         return;
       }
@@ -272,7 +255,7 @@ class Douyu {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
     });
-    return resp;
+    return resp.body;
   }
 
   //   private async getMobileStream(params: string): Promise<string | undefined> {

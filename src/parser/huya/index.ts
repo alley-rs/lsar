@@ -75,7 +75,7 @@ class Huya {
       url = this.pageURL;
     }
 
-    const html = await get<string>(url, {
+    const { body: html } = await get<string>(url, {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
     });
@@ -90,12 +90,12 @@ class Huya {
   }
 
   private async getRoomProfile(roomID: string) {
-    const text = await get<string>(
+    const { body: text } = await get<string>(
       `https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=${roomID}`,
       {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-      }
+      },
     );
 
     const profile = JSON.parse(text) as CacheProfile;
@@ -137,7 +137,7 @@ class Huya {
         const anticode = await this.parseAnticode(
           item.sFlvAntiCode,
           uid,
-          item.sStreamName
+          item.sStreamName,
         );
         const url = `${item.sFlvUrl}/${item.sStreamName}.${item.sFlvUrlSuffix}?${anticode}`;
         parsedResult.links.push(url);
@@ -146,7 +146,7 @@ class Huya {
         const anticode = await this.parseAnticode(
           item.sHlsAntiCode,
           uid,
-          item.sStreamName
+          item.sStreamName,
         );
         const url = `${item.sHlsUrl}/${item.sStreamName}.${item.sHlsUrlSuffix}?${anticode}`;
         parsedResult.links.push(url);
@@ -166,10 +166,10 @@ class Huya {
       data: {},
     };
 
-    const obj = await post<{ data: { uid: string } }>(
+    const { body: obj } = await post<{ data: { uid: string } }>(
       url,
       JSON.stringify(json),
-      "json"
+      "json",
     );
 
     return obj.data.uid;
@@ -217,7 +217,7 @@ class Huya {
     const queryString = Object.entries(q)
       .map(
         ([key, value]) =>
-          `${encodeURIComponent(key)}=${encodeURIComponent(value[0])}`
+          `${encodeURIComponent(key)}=${encodeURIComponent(value[0])}`,
       )
       .join("&");
 

@@ -1,4 +1,5 @@
 import bilibili from "./bilibili";
+import douyin from "./douyin";
 import douyu from "./douyu";
 import huya from "./huya";
 
@@ -21,6 +22,7 @@ export const platforms = {
   douyin: {
     label: "抖音",
     roomBaseURL: "https://live.douyin.com/",
+    parser: douyin,
   },
 } as const;
 //   {
