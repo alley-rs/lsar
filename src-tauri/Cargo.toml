@@ -41,6 +41,7 @@ open = "5"
 
 tauri-plugin-shell = "2.0.0-rc"
 tauri-plugin-clipboard-manager = "2.0.0-rc"
+tauri-plugin-dialog = "2.0.0-rc"
 
 [profile.release]
 panic = "abort"

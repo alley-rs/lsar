@@ -1,5 +1,6 @@
-import { Button, Dialog, Flex, Input, Label, Space } from "alley-components";
-import { createSignal, useContext } from "solid-js";
+import { open } from "@tauri-apps/plugin-dialog";
+import { Button, Dialog, Flex, Label, Space } from "alley-components";
+import { createSignal, Show, useContext } from "solid-js";
 import { writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
 
@@ -7,6 +8,14 @@ const Settings = () => {
   const { config, refetchConfig } = useContext(AppContext)![2];
 
   const [path, setPath] = createSignal(config()?.player.path);
+
+  const onSelectFile = async () => {
+    const file = await open({
+      multiple: false,
+      directory: false,
+    });
+    setPath(file?.path);
+  };
 
   const onCancel = () => {
     if (!config()?.player.path) {
@@ -30,25 +39,30 @@ const Settings = () => {
   return (
     <Dialog
       show={!config()?.player.path}
-      onClose={() => {}}
+      onClose={() => { }}
       maskClosable={false}
     >
       <Flex direction="vertical" gap={8}>
         <Space>
           <Label>播放器绝对路径</Label>
-          <Input
-            value={path()}
-            onChange={(v) => {
-              setPath(v);
-            }}
-          />
+          <Show when={!path()} fallback={<span>{path()}</span>}>
+            <Button size="small" onClick={onSelectFile}>
+              选择文件
+            </Button>
+          </Show>
         </Space>
 
         <Space justify="around">
-          <Button danger onClick={onCancel}>
+          <Button
+            danger
+            onClick={onCancel}
+            disabled={!config()?.player.path || !path()}
+          >
             取消
           </Button>
-          <Button onClick={onOk}>确认</Button>
+          <Button onClick={onOk} disabled={!path()}>
+            确认
+          </Button>
         </Space>
       </Flex>
     </Dialog>
