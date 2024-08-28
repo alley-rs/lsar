@@ -10,6 +10,7 @@
     "serve": "vite preview",
     "tauri": "tauri",
     "start:dev": "cross-env RUST_BACKTRACE=1 tauri dev",
+    "check": "biome check --write src",
     "dev": "bun run start:dev"
   },
   "license": "MIT",
@@ -24,6 +25,7 @@
     "solid-js": "^1.8.21"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@tauri-apps/cli": "2.0.0-rc.7",
     "@types/node": "^22.5.0",
     "cross-env": "^7.0.3",

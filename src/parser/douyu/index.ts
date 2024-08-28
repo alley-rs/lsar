@@ -71,7 +71,7 @@ class Douyu {
 
   async getRoomInfo(params: string): Promise<Info | null | Error> {
     let url = "";
-    let resp: Response<Info>;
+    let resp: HTTPResponse<Info>;
     if (this.isPost) {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.finalRoomID}`;
       resp = await post(url, params);

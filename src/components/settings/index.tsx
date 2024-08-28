@@ -30,7 +30,7 @@ const Settings = () => {
   return (
     <Dialog
       show={!config()?.player.path}
-      onClose={() => { }}
+      onClose={() => {}}
       maskClosable={false}
     >
       <Flex direction="vertical" gap={8}>
