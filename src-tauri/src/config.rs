@@ -5,7 +5,7 @@ use tokio::fs;
 
 use crate::{error::LsarResult, global::APP_CONFIG_DIR};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Player {
     path: PathBuf,
     args: Vec<String>,
@@ -20,7 +20,7 @@ impl Default for Player {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Bilibili {
     cookie: String,
 }
@@ -33,7 +33,7 @@ impl Default for Bilibili {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Platform {
     bilibili: Bilibili,
 }
@@ -46,7 +46,7 @@ impl Default for Platform {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     player: Player,
     platform: Platform,
@@ -98,10 +98,12 @@ pub async fn read_config_file() -> LsarResult<Config> {
 
 #[tauri::command]
 pub async fn write_config_file(config: Config) -> LsarResult<()> {
-    if !CONFIG_FILE_PATH.exists() {
-        let data = toml::to_string(&config)?;
-        fs::write(&*CONFIG_FILE_PATH, data).await?;
-    }
+    debug!(message = "写入新配置", config = ?config);
+
+    let data = toml::to_string(&config)?;
+    fs::write(&*CONFIG_FILE_PATH, data).await?;
+
+    info!(message = "已写入新配置");
 
     Ok(())
 }
