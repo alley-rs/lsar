@@ -1,0 +1,57 @@
+:root {
+  --alley-color-bg: transparent;
+  --alley-color-mask: rgba(255, 255, 255, 0.5);
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --alley-color-text: #fff;
+    --alley-color-text-description: rgba(255, 255, 255, 0.45);
+
+    --alley-color-bg-container: rgba(0, 0, 0, 0.4);
+
+    --alley-color-border: #000;
+
+    --alley-color-mask: rgba(0, 0, 0, 0.5);
+
+    .alley-input {
+      --alley-input-addon-bg: rgba(255, 255, 255, 0.04);
+      // --alley-input-active-border-color: #1668dc;
+      // --alley-input-hover-border-color: #3c89e8;
+      --alley-input-active-shadow: 0 0 0 2px rgba(0, 60, 180, 0.15);
+      --alley-input-error-active-shadow: 0 0 0 2px rgba(238, 38, 56, 0.11);
+      --alley-input-warning-active-shadow: 0 0 0 2px rgba(173, 107, 0, 0.15);
+      --alley-input-hover-bg: #141414;
+      --alley-input-active-bg: #141414;
+    }
+
+    .alley-button {
+      --alley-color-button-backgroud: #1a1a1a;
+      --alley-color-button-text: var(--alley-color-text);
+      --alley-button-plain-hover-bg: rgba(255, 255, 255, 0.06);
+      --alley-button-primary-hover: #646cff;
+      --alley-color-button-ripple-danger: rgb(0 0 0 / 30%);
+      --alley-button-ripple-container: #4045a3;
+
+      &-plain {
+        --alley-button-ripple-container: #646cff;
+      }
+
+      &-primary {
+        --alley-button-ripple-container: rgb(0 0 0 / 30%);
+      }
+    }
+
+    .alley-tag {
+      --alley-tag-default-bg: #1d1d1d;
+      --alley-tag-default-color: rgba(255, 255, 255, 0.85);
+    }
+  }
+}

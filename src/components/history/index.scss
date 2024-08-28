@@ -1,0 +1,16 @@
+#history {
+  flex: 1.2;
+  background-color: rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+
+  .history-item {
+    background-color: rgba(0, 0, 0, 0.08);
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+
+    .alley-divider-horizontal {
+      margin: 4px 0;
+    }
+  }
+}

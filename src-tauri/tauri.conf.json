@@ -1,0 +1,35 @@
+{
+  "productName": "lsar",
+  "version": "../package.json",
+  "identifier": "com.alley.lsar",
+  "build": {
+    "beforeDevCommand": "bun run start",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build:vite",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "lsar",
+        "width": 800,
+        "height": 600,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
