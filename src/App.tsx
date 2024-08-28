@@ -14,6 +14,9 @@ const App = () => {
 
   const [tableCreated, setTableCreated] = createSignal(false);
   const [toast, setToast] = createSignal<Toast | null>(null);
+  const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
+    null,
+  );
 
   onMount(() => {
     creataTable().then(() => setTableCreated(true));
@@ -26,6 +29,7 @@ const App = () => {
           { refetchHistoryItems },
           { toast, setToast },
           { config, refetchConfig },
+          { parsedResult, setParsedResult },
         ]}
       >
         <Show when={tableCreated()} fallback={<div>正在创建表格</div>}>

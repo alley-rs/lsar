@@ -6,9 +6,9 @@ import {
   Tooltip,
   Typography,
 } from "alley-components";
-import { AiFillChrome, AiFillDelete, AiFillPlayCircle } from "solid-icons/ai";
+import { AiFillApi, AiFillChrome, AiFillDelete } from "solid-icons/ai";
 import { createSignal, useContext } from "solid-js";
-import { deleteHistoryByID, open, play, readConfigFile } from "~/command";
+import { deleteHistoryByID, open, readConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import { platforms } from "~/parser";
 
@@ -19,7 +19,7 @@ interface HistoryItemProps extends HistoryItem {
 }
 
 const HistoryItem = (props: HistoryItemProps) => {
-  const [_, { setToast }] = useContext(AppContext)!;
+  const [_, { setToast }, __, { setParsedResult }] = useContext(AppContext)!;
 
   const [parsing, setParsing] = createSignal(false);
 
@@ -34,18 +34,16 @@ const HistoryItem = (props: HistoryItemProps) => {
     if (props.platform === "bilibili") {
       const config = await readConfigFile();
       console.log(config);
+    } else {
+      const r = await platforms[props.platform].parser(
+        props.room_id.toString(),
+      );
+      if (r instanceof Error) {
+        setToast({ type: "error", message: r.message });
+      } else if (r) {
+        setParsedResult(r);
+      }
     }
-
-    // const r = await platforms[props.platform].parser(props.room_id.toString());
-    // if (r instanceof Error) {
-    //   setToast({ type: "error", message: r.message });
-    // } else if (r) {
-    //   play(r.links[0]);
-    //   setToast({
-    //     type: "success",
-    //     message: "已创建播放器进程，请等待 1~3 秒播放器发起网络请求",
-    //   });
-    // }
 
     setParsing(false);
   };
@@ -70,7 +68,7 @@ const HistoryItem = (props: HistoryItemProps) => {
           <Tooltip text="解析本直播间" placement="bottom" delay={1000}>
             <Button
               isLoading={parsing()}
-              icon={<AiFillPlayCircle />}
+              icon={<AiFillApi />}
               type="plain"
               shape="circle"
               size="small"

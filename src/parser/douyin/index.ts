@@ -45,7 +45,6 @@ export class Douyin {
   private async getSetCookie() {
     const resp = await get(this.roomURL, this.headers);
     const respHeader = resp.headers as Record<string, string>;
-    console.log(resp);
 
     const setCookie = respHeader["set-cookie"];
     if (!setCookie) {
@@ -94,9 +93,16 @@ export class Douyin {
 
   async parse() {
     const acNonce = await this.getAcNonce();
+    if (acNonce instanceof Error) {
+      return acNonce;
+    }
+
     this.headers.cookie = `__ac_nonce=${acNonce}`;
 
     const ttwid = await this.getTtwid();
+    if (ttwid instanceof Error) {
+      return ttwid;
+    }
 
     this.headers.cookie = `ttwid=${ttwid}`;
     this.headers.Accept = "*/*";
@@ -111,6 +117,7 @@ export class Douyin {
     const { flv_pull_url, hls_pull_url_map } = data[0].stream_url;
 
     const parsedResult: ParsedResult = {
+      platform: "douyin",
       anchor: user.nickname,
       title: data[0].title,
       links: [flv_pull_url.FULL_HD1, hls_pull_url_map.FULL_HD1], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识

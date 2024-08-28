@@ -19,4 +19,8 @@ type AppContext = [
     config: Resource<Config>;
     refetchConfig: () => void;
   },
+  {
+    parsedResult: Accessor<ParsedResult | null>;
+    setParsedResult: Setter<ParsedResult | null>;
+  },
 ];

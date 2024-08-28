@@ -189,7 +189,7 @@ class Douyu {
     return params;
   }
 
-  async parse() {
+  async parse(): Promise<Error | ParsedResult> {
     /*
             码率或清晰度
                 - 900 高清
@@ -226,7 +226,7 @@ class Douyu {
           log_prefix,
           "更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序",
         );
-        return;
+        return null;
       }
 
       if (info instanceof Error) {
@@ -240,6 +240,7 @@ class Douyu {
     }
 
     return {
+      platform: "douyu",
       title: this.title,
       anchor: this.anchor,
       roomID: this.finalRoomID,

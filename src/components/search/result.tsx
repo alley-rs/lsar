@@ -15,9 +15,7 @@ import { insertHistory, open, play } from "~/command";
 import { AppContext } from "~/context";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
-const Result = (
-  props: ParsedResult & { roomURL: string; platform: Platform },
-) => {
+const Result = (props: ParsedResult & { roomURL: string }) => {
   const [{ refetchHistoryItems }] = useContext(AppContext)!;
 
   const [links, setLinks] = createStore<string[]>([]);

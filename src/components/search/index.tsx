@@ -10,21 +10,20 @@ import BiliCookieEditor from "./bili-cookie";
 const Dialog = lazy(() => import("alley-components/lib/components/dialog"));
 
 const Search = () => {
-  const [_, { setToast }, { config }] = useContext(AppContext)!;
+  const [_, { setToast }, { config }, { parsedResult, setParsedResult }] =
+    useContext(AppContext)!;
 
   const [input, setInput] = createSignal("");
   const [currentPlatform, setCurrentPlatform] = createSignal<Platform | null>(
     null,
   );
 
-  const [parseResult, setParsedResult] = createSignal<ParsedResult>();
-
   const [loading, setLoading] = createSignal(false);
 
   const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
     createSignal(false);
 
-  const resetParseResult = () => setParsedResult(undefined);
+  const resetParseResult = () => setParsedResult(null);
   const resetInput = () => setInput("");
 
   const selectPlatform = (value: Platform) => {
@@ -58,7 +57,7 @@ const Search = () => {
 
     const platform = currentPlatform();
 
-    let result: ParsedResult | Error | undefined;
+    let result: ParsedResult | Error | null = null;
 
     if (platform === "bilibili") {
       if (!config()?.platform.bilibili.cookie.length) {
@@ -73,13 +72,15 @@ const Search = () => {
       result = await platforms[platform!].parser(input());
     }
 
-    if (result instanceof Error) {
-      setToast({ type: "error", message: result.message });
-      setLoading(false);
-      return;
-    }
+    if (result) {
+      if (result instanceof Error) {
+        setToast({ type: "error", message: result.message });
+        setLoading(false);
+        return;
+      }
 
-    setParsedResult(result);
+      setParsedResult(result);
+    }
 
     setLoading(false);
   };
@@ -107,9 +108,8 @@ const Search = () => {
         </Space>
 
         <Result
-          {...parseResult()!}
+          {...parsedResult()!}
           roomURL={`${platforms[currentPlatform()!].roomBaseURL}${input()}`}
-          platform={currentPlatform()!}
         />
       </Flex>
 

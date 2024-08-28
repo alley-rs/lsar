@@ -124,6 +124,7 @@ class Huya {
     const { baseSteamInfoList } = profile.data.stream;
 
     const parsedResult: ParsedResult = {
+      platform: "huya",
       links: [],
       title: introduction,
       anchor: nick,

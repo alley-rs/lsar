@@ -173,7 +173,7 @@ class Bilibili {
     return body;
   }
 
-  async parse(): Promise<ParsedResult | Error | undefined> {
+  async parse(): Promise<ParsedResult | Error> {
     const username = await this.verifyCookie();
     info(log_prefix, `验证成功，登录的用户:${username}`);
 
@@ -188,6 +188,7 @@ class Bilibili {
       anchor: this.anchor,
       category: this.category,
       links: [],
+      platform: "bilibili",
     };
 
     for (const s of res.data.playurl_info.playurl.stream) {
