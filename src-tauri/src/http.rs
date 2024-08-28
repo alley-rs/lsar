@@ -1,14 +1,59 @@
 use std::collections::HashMap;
 
 use reqwest::header::{HeaderMap, HeaderName, CONTENT_TYPE};
-use serde::Deserialize;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 use tauri::http::HeaderValue;
 
 use crate::error::LsarResult;
 
+#[derive(Debug, Serialize)]
+pub struct Response {
+    status: u16,
+    headers: Map<String, Value>,
+    body: Value,
+}
+
+fn header_to_map(value: &HeaderMap) -> Map<String, Value> {
+    Map::from_iter(
+        value
+            .into_iter()
+            .map(|(k, v)| (k.to_string(), Value::String(v.to_str().unwrap().to_owned()))),
+    )
+}
+
+async fn handle_response(resp: reqwest::Response) -> LsarResult<Response> {
+    let status = resp.status().as_u16();
+    let headers = resp.headers().clone();
+    if let Some(ct) = resp.headers().get("content-type") {
+        if ct.to_str().unwrap().contains("json") {
+            let v: Value = resp.json().await.map_err(|e| {
+                error!(message = "获取 json 响应时失败", error = ?e);
+                e
+            })?;
+
+            return Ok(Response {
+                status,
+                headers: header_to_map(&headers),
+                body: v,
+            });
+        }
+    };
+
+    let text = resp.text().await.map_err(|e| {
+        error!(message = "获取文本响应时失败", error = ?e);
+        e
+    })?;
+
+    Ok(Response {
+        status,
+        headers: header_to_map(&headers),
+        body: Value::String(text),
+    })
+}
+
 #[tauri::command]
-pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Value> {
+pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Response> {
     debug!(message = "发送 GET 请求", url = url);
 
     let client = reqwest::Client::new();
@@ -22,23 +67,8 @@ pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Va
         error!(message = "发送请求时失败", error = ?e);
         e
     })?;
-    if let Some(ct) = resp.headers().get("content-type") {
-        if ct.to_str().unwrap().contains("json") {
-            let v: Value = resp.json().await.map_err(|e| {
-                error!(message = "获取 json 响应时失败", error = ?e);
-                e
-            })?;
 
-            return Ok(v);
-        }
-    };
-
-    let text = resp.text().await.map_err(|e| {
-        error!(message = "获取文本响应时失败", error = ?e);
-        e
-    })?;
-
-    Ok(Value::String(text))
+    handle_response(resp).await
 }
 
 #[derive(Debug, Deserialize)]
@@ -58,7 +88,11 @@ impl Into<HeaderValue> for PostContentType {
 }
 
 #[tauri::command]
-pub async fn post(url: String, body: String, content_type: PostContentType) -> LsarResult<Value> {
+pub async fn post(
+    url: String,
+    body: String,
+    content_type: PostContentType,
+) -> LsarResult<Response> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -68,21 +102,5 @@ pub async fn post(url: String, body: String, content_type: PostContentType) -> L
         .send()
         .await?;
 
-    if let Some(ct) = resp.headers().get("content-type") {
-        if ct.to_str().unwrap().contains("json") {
-            let v: Value = resp.json().await.map_err(|e| {
-                error!(message = "获取 json 响应时失败", error = ?e);
-                e
-            })?;
-
-            return Ok(v);
-        }
-    };
-
-    let text = resp.text().await.map_err(|e| {
-        error!(message = "获取文本响应时失败", error = ?e);
-        e
-    })?;
-
-    Ok(Value::String(text))
+    handle_response(resp).await
 }
