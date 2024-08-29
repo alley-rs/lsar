@@ -6,6 +6,7 @@ mod history;
 mod http;
 mod log;
 mod platform;
+mod update;
 
 #[macro_use]
 extern crate tracing;
@@ -23,6 +24,7 @@ use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 use crate::global::APP_CONFIG_DIR;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
+use crate::update::update;
 
 #[tauri::command]
 async fn md5(text: String) -> String {
@@ -112,6 +114,12 @@ pub fn run() {
                 apply_acrylic(&window, Some((18, 18, 18, 125)))
                     .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
             }
+
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                // 检测更新出错时只记录日志，不异常退出
+                let _ = update(handle).await;
+            });
 
             Ok(())
         })

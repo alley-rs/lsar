@@ -14,6 +14,8 @@ pub(super) enum LsarError {
     TomlSerialize(#[from] toml::ser::Error),
     #[error(transparent)]
     TomlDeserialize(#[from] toml::de::Error),
+    #[error(transparent)]
+    Update(#[from] tauri_plugin_updater::Error),
 }
 
 impl Serialize for LsarError {
