@@ -131,7 +131,8 @@ export class Douyin {
       roomID: this.roomID,
       category:
         partition_road_map.sub_partition?.partition.title ??
-        partition_road_map.partition?.title,
+        partition_road_map.partition?.title ??
+        "",
     };
 
     return parsedResult;

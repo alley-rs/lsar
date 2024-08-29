@@ -7,7 +7,7 @@ import {
   Typography,
 } from "alley-components";
 import { AiFillApi, AiFillChrome, AiFillDelete } from "solid-icons/ai";
-import { createSignal, Show, useContext } from "solid-js";
+import { createSignal, useContext } from "solid-js";
 import { deleteHistoryByID, open, readConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import { platforms } from "~/parser";
@@ -52,11 +52,9 @@ const HistoryItem = (props: HistoryItemProps) => {
     <Flex class="history-item" direction="vertical">
       <Space gap={8} justify="between">
         <h4>{props.last_title}</h4>
-        <Show when={props.category}>
-          <Text type="secondary" italic>
-            {props.category}
-          </Text>
-        </Show>
+        <Text type="secondary" italic>
+          {props.category}
+        </Text>
       </Space>
 
       <Divider />

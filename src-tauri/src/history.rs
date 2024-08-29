@@ -8,7 +8,7 @@ pub(crate) struct HistoryItem {
     platform: Platform,
     room_id: i64,
     anchor: String,
-    category: Option<String>,
+    category: String,
     last_title: String,
     #[serde(with = "time::serde::rfc3339")]
     last_play_time: time::OffsetDateTime,
@@ -27,8 +27,8 @@ impl HistoryItem {
         &self.anchor
     }
 
-    pub(crate) fn category(&self) -> Option<&str> {
-        self.category.as_deref()
+    pub(crate) fn category(&self) -> &str {
+        &self.category
     }
 
     pub(crate) fn last_title(&self) -> &str {
@@ -40,28 +40,8 @@ impl HistoryItem {
     }
 }
 
-impl
-    From<(
-        i64,
-        i8,
-        i64,
-        String,
-        Option<String>,
-        String,
-        time::OffsetDateTime,
-    )> for HistoryItem
-{
-    fn from(
-        value: (
-            i64,
-            i8,
-            i64,
-            String,
-            Option<String>,
-            String,
-            time::OffsetDateTime,
-        ),
-    ) -> Self {
+impl From<(i64, i8, i64, String, String, String, time::OffsetDateTime)> for HistoryItem {
+    fn from(value: (i64, i8, i64, String, String, String, time::OffsetDateTime)) -> Self {
         Self {
             id: value.0,
             platform: value.1.into(),
