@@ -132,6 +132,12 @@ class Douyu {
         signFunc = eval(ub98484234 + matchResult[0] + ub98484234Call) as string;
       }
     }
+
+    // FIXME: signFunc 为空很奇怪, 需要进一步修复
+    if (!signFunc) {
+      return Error(`此房间未获取到 signFunc, 解析失败: ${this.roomID}`);
+    }
+
     const v = signFunc.match(/\w{12}/)!;
 
     const md5 = await computeMD5(`${this.finalRoomID}${did}${ts}${v[0]}`);
@@ -168,7 +174,12 @@ class Douyu {
         }
       }
 
-      this.signFunc = await this.matchSignFunc(html);
+      const signFunc = await this.matchSignFunc(html);
+      if (signFunc instanceof Error) {
+        return signFunc;
+      }
+
+      this.signFunc = signFunc;
 
       const anchor = html.match(/<div class="Title-anchorName" title="(.+?)">/);
       this.anchor = anchor![1];
