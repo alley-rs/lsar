@@ -78,18 +78,17 @@ impl Config {
 
 static CONFIG_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| APP_CONFIG_DIR.join("lsar.toml"));
 
-pub async fn init_config_file() -> LsarResult<()> {
+#[tauri::command]
+pub async fn read_config_file() -> LsarResult<Config> {
+    // 防止用户在启动程序后删除配置文件引发异常
     if !CONFIG_FILE_PATH.exists() {
         let default_config = Config::default();
         let config = toml::to_string(&default_config)?;
         fs::write(&*CONFIG_FILE_PATH, config).await?;
+
+        return Ok(default_config);
     }
 
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn read_config_file() -> LsarResult<Config> {
     let data = fs::read_to_string(&*CONFIG_FILE_PATH).await?;
     let config: Config = toml::from_str(&data)?;
 

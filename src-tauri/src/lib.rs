@@ -17,7 +17,7 @@ use time::macros::{format_description, offset};
 use tracing::Level;
 use tracing_subscriber::fmt::time::OffsetTime;
 
-use crate::config::{init_config_file, read_config_file, write_config_file};
+use crate::config::{read_config_file, write_config_file};
 use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 #[cfg(all(desktop, not(debug_assertions)))]
 use crate::global::APP_CONFIG_DIR;
@@ -83,8 +83,6 @@ pub fn run() {
     } else {
         builder.json().init();
     }
-
-    tauri::async_runtime::spawn(init_config_file());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
