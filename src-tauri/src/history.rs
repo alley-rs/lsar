@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 
 use crate::platform::Platform;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct HistoryItem {
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct HistoryItem {
     id: i64,
     platform: Platform,
     room_id: i64,
@@ -11,45 +12,81 @@ pub(crate) struct HistoryItem {
     category: String,
     last_title: String,
     #[serde(with = "time::serde::rfc3339")]
-    last_play_time: time::OffsetDateTime,
+    last_play_time: OffsetDateTime,
 }
 
 impl HistoryItem {
-    pub(crate) fn platform(&self) -> &Platform {
+    pub fn new(
+        id: i64,
+        platform: Platform,
+        room_id: i64,
+        anchor: String,
+        category: String,
+        last_title: String,
+        last_play_time: OffsetDateTime,
+    ) -> Self {
+        Self {
+            id,
+            platform,
+            room_id,
+            anchor,
+            category,
+            last_title,
+            last_play_time,
+        }
+    }
+
+    // pub fn id(&self) -> i64 {
+    //     self.id
+    // }
+
+    pub fn platform(&self) -> &Platform {
         &self.platform
     }
 
-    pub(crate) fn room_id(&self) -> i64 {
+    pub fn room_id(&self) -> i64 {
         self.room_id
     }
 
-    pub(crate) fn anchor(&self) -> &str {
+    pub fn anchor(&self) -> &str {
         &self.anchor
     }
 
-    pub(crate) fn category(&self) -> &str {
+    pub fn category(&self) -> &str {
         &self.category
     }
 
-    pub(crate) fn last_title(&self) -> &str {
+    pub fn last_title(&self) -> &str {
         &self.last_title
     }
 
-    pub(crate) fn last_play_time(&self) -> time::OffsetDateTime {
+    pub fn last_play_time(&self) -> OffsetDateTime {
         self.last_play_time
     }
 }
 
-impl From<(i64, i8, i64, String, String, String, time::OffsetDateTime)> for HistoryItem {
-    fn from(value: (i64, i8, i64, String, String, String, time::OffsetDateTime)) -> Self {
-        Self {
-            id: value.0,
-            platform: value.1.into(),
-            room_id: value.2,
-            anchor: value.3,
-            category: value.4,
-            last_title: value.5,
-            last_play_time: value.6,
-        }
+impl TryFrom<(i64, i64, i64, String, String, String, OffsetDateTime)> for HistoryItem {
+    type Error = &'static str;
+
+    fn try_from(
+        (id, platform, room_id, anchor, category, last_title, last_play_time): (
+            i64,
+            i64,
+            i64,
+            String,
+            String,
+            String,
+            OffsetDateTime,
+        ),
+    ) -> Result<HistoryItem, Self::Error> {
+        Ok(Self::new(
+            id,
+            platform.try_into()?,
+            room_id,
+            anchor,
+            category,
+            last_title,
+            last_play_time,
+        ))
     }
 }

@@ -7,68 +7,87 @@ use tauri::http::HeaderValue;
 
 use crate::error::LsarResult;
 
+type JsonMap = Map<String, Value>;
+
 #[derive(Debug, Serialize)]
 pub struct Response {
     status: u16,
-    headers: Map<String, Value>,
+    headers: JsonMap,
     body: Value,
 }
 
-fn header_to_map(value: &HeaderMap) -> Map<String, Value> {
-    Map::from_iter(
-        value
-            .into_iter()
-            .map(|(k, v)| (k.to_string(), Value::String(v.to_str().unwrap().to_owned()))),
-    )
+fn header_to_map(value: &HeaderMap) -> JsonMap {
+    value
+        .into_iter()
+        .filter_map(|(k, v)| {
+            v.to_str()
+                .ok()
+                .map(|v_str| (k.to_string(), Value::String(v_str.to_owned())))
+        })
+        .collect()
 }
 
-async fn handle_response(resp: reqwest::Response) -> LsarResult<Response> {
-    let status = resp.status().as_u16();
-    let headers = resp.headers().clone();
-    if let Some(ct) = resp.headers().get("content-type") {
-        if ct.to_str().unwrap().contains("json") {
-            let v: Value = resp.json().await.map_err(|e| {
-                error!(message = "获取 json 响应时失败", error = ?e);
+trait ResponseHandler {
+    async fn handle_response(self) -> LsarResult<Response>;
+}
+
+impl ResponseHandler for reqwest::Response {
+    async fn handle_response(self) -> LsarResult<Response> {
+        let status = self.status().as_u16();
+        let headers = self.headers().clone();
+        let body = if let Some(ct) = self.headers().get("content-type") {
+            if ct.to_str().map(|s| s.contains("json")).unwrap_or(false) {
+                self.json().await.map_err(|e| {
+                    error!(message = "Failed to parse JSON response", error = ?e);
+                    e
+                })?
+            } else {
+                Value::String(self.text().await.map_err(|e| {
+                    error!(message = "Failed to get text response", error = ?e);
+                    e
+                })?)
+            }
+        } else {
+            Value::String(self.text().await.map_err(|e| {
+                error!(message = "Failed to get text response", error = ?e);
                 e
-            })?;
+            })?)
+        };
 
-            return Ok(Response {
-                status,
-                headers: header_to_map(&headers),
-                body: v,
-            });
-        }
-    };
-
-    let text = resp.text().await.map_err(|e| {
-        error!(message = "获取文本响应时失败", error = ?e);
-        e
-    })?;
-
-    Ok(Response {
-        status,
-        headers: header_to_map(&headers),
-        body: Value::String(text),
-    })
+        Ok(Response {
+            status,
+            headers: header_to_map(&headers),
+            body,
+        })
+    }
 }
 
 #[tauri::command]
 pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Response> {
-    debug!(message = "发送 GET 请求", url = url);
+    debug!(message = "Sending GET request", url = %url);
 
     let client = reqwest::Client::new();
+    let header: HeaderMap = headers
+        .into_iter()
+        .filter_map(|(k, v)| {
+            Some((
+                k.parse::<HeaderName>().ok()?,
+                v.parse::<HeaderValue>().ok()?,
+            ))
+        })
+        .collect();
 
-    let mut header = HeaderMap::new();
-    headers.into_iter().for_each(|(k, v)| {
-        header.insert(k.parse::<HeaderName>().unwrap(), v.parse().unwrap());
-    });
-
-    let resp = client.get(url).headers(header).send().await.map_err(|e| {
-        error!(message = "发送请求时失败", error = ?e);
-        e
-    })?;
-
-    handle_response(resp).await
+    client
+        .get(url)
+        .headers(header)
+        .send()
+        .await
+        .map_err(|e| {
+            error!(message = "Failed to send request", error = ?e);
+            e
+        })?
+        .handle_response()
+        .await
 }
 
 #[derive(Debug, Deserialize)]
@@ -81,8 +100,8 @@ pub enum PostContentType {
 impl Into<HeaderValue> for PostContentType {
     fn into(self) -> HeaderValue {
         match self {
-            Self::Json => "application/json".parse().unwrap(),
-            Self::Form => "application/x-www-form-urlencoded".parse().unwrap(),
+            Self::Json => HeaderValue::from_static("application/json"),
+            Self::Form => HeaderValue::from_static("application/x-www-form-urlencoded"),
         }
     }
 }
@@ -95,12 +114,12 @@ pub async fn post(
 ) -> LsarResult<Response> {
     let client = reqwest::Client::new();
 
-    let resp = client
+    client
         .post(url)
         .body(body)
         .header(CONTENT_TYPE, content_type)
         .send()
-        .await?;
-
-    handle_response(resp).await
+        .await?
+        .handle_response()
+        .await
 }

@@ -8,12 +8,12 @@ mod log;
 mod platform;
 #[cfg(desktop)]
 mod update;
+mod utils;
 
 #[macro_use]
 extern crate tracing;
 
 use error::LsarResult;
-use md5::{Digest, Md5};
 use tauri::Manager;
 use time::macros::{format_description, offset};
 use tracing::Level;
@@ -27,25 +27,11 @@ use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
 #[cfg(desktop)]
 use crate::update::update;
-
-#[tauri::command]
-async fn md5(text: String) -> String {
-    let mut hasher = Md5::new();
-    hasher.update(&text);
-    let result = hasher.finalize();
-    let bytes: &[u8] = &result[..];
-    debug!("md5 bytes: {:?}", bytes);
-    bytes
-        .iter()
-        .map(|b| format!("{:02x}", b).to_string())
-        .collect::<String>()
-}
+use crate::utils::md5;
 
 #[tauri::command]
 async fn play(url: String) -> LsarResult<()> {
-    let config = read_config_file().await?;
-
-    config.play(url)
+    read_config_file().await?.play(url)
 }
 
 #[tauri::command]
@@ -98,40 +84,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
-        .setup(|app| {
-            #[cfg(desktop)]
-            app.handle()
-                .plugin(tauri_plugin_updater::Builder::new().build())?;
-
-            let window = app.get_webview_window("main").unwrap();
-
-            #[cfg(target_os = "macos")]
-            {
-                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
-
-                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
-                    .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
-            }
-
-            #[cfg(target_os = "windows")]
-            {
-                use window_vibrancy::apply_acrylic;
-
-                apply_acrylic(&window, Some((18, 18, 18, 125)))
-                    .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
-            }
-
-            #[cfg(desktop)]
-            {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    // 检测更新出错时只记录日志，不异常退出
-                    let _ = update(handle).await;
-                });
-            }
-
-            Ok(())
-        })
+        .setup(setup)
         .invoke_handler(tauri::generate_handler![
             get_all_history,
             insert_a_history,
@@ -151,4 +104,38 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(desktop)]
+    app.handle()
+        .plugin(tauri_plugin_updater::Builder::new().build())?;
+
+    let window = app.get_webview_window("main").unwrap();
+
+    #[cfg(target_os = "macos")]
+    {
+        use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+        apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+            .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use window_vibrancy::apply_acrylic;
+        apply_acrylic(&window, Some((18, 18, 18, 125)))
+            .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    }
+
+    #[cfg(desktop)]
+    {
+        let handle = app.handle().clone();
+        tauri::async_runtime::spawn(async move {
+            if let Err(e) = update(handle).await {
+                error!("Failed to check for updates: {:?}", e);
+            }
+        });
+    }
+
+    Ok(())
 }
