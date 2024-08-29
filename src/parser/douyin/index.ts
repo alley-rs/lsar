@@ -7,7 +7,7 @@ interface RoomInfo {
     data: {
       status: 1 | 2;
       title: string;
-      stream_url: {
+      stream_url?: {
         flv_pull_url: Record<Resolution, string>;
         hls_pull_url_map: Record<Resolution, string>;
       };
@@ -16,7 +16,8 @@ interface RoomInfo {
       nickname: string;
     };
     partition_road_map: {
-      partition: { title: string };
+      // 抖音可能无分类，如 708241921244
+      partition?: { title: string };
       sub_partition?: {
         partition: { title: string };
       };
@@ -110,9 +111,15 @@ export class Douyin {
     this.headers.Connection = "keep-alive";
     delete this.headers["Upgrade-Insecure-Requests"];
 
+    const info = await this.getRoomInfo();
+
     const {
       data: { user, data, partition_road_map },
-    } = await this.getRoomInfo();
+    } = info;
+
+    if (!data[0].stream_url) {
+      return Error("此房间未直播");
+    }
 
     const { flv_pull_url, hls_pull_url_map } = data[0].stream_url;
 
@@ -123,8 +130,8 @@ export class Douyin {
       links: [flv_pull_url.FULL_HD1, hls_pull_url_map.FULL_HD1], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识
       roomID: this.roomID,
       category:
-        partition_road_map.sub_partition?.partition.title ||
-        partition_road_map.partition.title,
+        partition_road_map.sub_partition?.partition.title ??
+        partition_road_map.partition?.title,
     };
 
     return parsedResult;

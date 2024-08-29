@@ -5,7 +5,7 @@ interface ParsedResult {
   title: string;
   anchor: string;
   roomID: number;
-  category: string;
+  category?: string;
   links: string[];
 }
 

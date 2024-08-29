@@ -39,7 +39,7 @@ async fn create_history_table(pool: &SqlitePool) -> LsarResult<()> {
                 platform        INTEGER NOT NULL,
                 room_id         INTEGER NOT NULL,
                 anchor          VARCHAR(40) NOT NULL,
-                category        VARCHAR(40) NOT NULL,
+                category        VARCHAR(40) DEFAULT NULL,
                 last_title      VARCHAR(40) NOT NULL,
                 last_play_time  DATETIME NOT NULL
             )",
@@ -62,7 +62,15 @@ pub async fn get_all_history() -> LsarResult<Vec<HistoryItem>> {
 
     let pool = get_global_pool().await;
 
-    let rows: Vec<(i64, i8, i64, String, String, String, time::OffsetDateTime)> = sqlx::query_as(
+    let rows: Vec<(
+        i64,
+        i8,
+        i64,
+        String,
+        Option<String>,
+        String,
+        time::OffsetDateTime,
+    )> = sqlx::query_as(
         "select id, platform, room_id, anchor, category, last_title, last_play_time
 from history
 order by last_play_time desc;",

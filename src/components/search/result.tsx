@@ -63,7 +63,7 @@ const Result = (props: ParsedResult) => {
         <Space gap={16}>
           <Space>
             <Label>分类</Label>
-            <span>{props.category}</span>
+            <span>{props.category ?? "无"}</span>
           </Space>
 
           <Space>
