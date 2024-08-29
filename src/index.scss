@@ -23,6 +23,15 @@
 
     --alley-color-mask: rgba(0, 0, 0, 0.5);
 
+    --alley-color-info-bg: rgb(41 44 104 / 30%);
+    --alley-color-info-border: #4045a3;
+
+    --alley-color-success-bg: #092b00;
+    --alley-color-success-border: #237804;
+
+    --alley-color-error-bg: #5c0011;
+    --alley-color-error-border: #820014;
+
     .alley-input {
       --alley-input-addon-bg: rgba(255, 255, 255, 0.04);
       // --alley-input-active-border-color: #1668dc;
