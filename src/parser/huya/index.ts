@@ -81,7 +81,14 @@ class Huya {
     });
 
     const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
-    const streamStr = ptn.exec(html)![1];
+
+    const streamStr = ptn.exec(html)?.[1];
+    if (!streamStr) {
+      return Error(
+        `获取 streamStr 失败, 可能因为网页解码错误, 房间号: ${this.roomID}`,
+      );
+    }
+
     const stream = JSON.parse(streamStr);
     const roomID = stream.data[0].gameLiveInfo.profileRoom as string;
     info(log_prefix, `真实房间 id：${roomID}`);
