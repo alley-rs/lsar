@@ -13,7 +13,7 @@ async fn get_global_pool() -> &'static SqlitePool {
             let db_path = APP_CONFIG_DIR.join("lsar.db");
             let uri = format!("{}?mode=rwc", db_path.display());
 
-            info!("Database URI", uri = uri);
+            info!(message = "Database URI", uri = uri);
 
             let pool = SqlitePoolOptions::new()
                 .max_connections(5)
