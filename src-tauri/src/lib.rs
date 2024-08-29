@@ -6,6 +6,7 @@ mod history;
 mod http;
 mod log;
 mod platform;
+#[cfg(desktop)]
 mod update;
 
 #[macro_use]
@@ -24,6 +25,7 @@ use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 use crate::global::APP_CONFIG_DIR;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
+#[cfg(desktop)]
 use crate::update::update;
 
 #[tauri::command]
@@ -97,6 +99,10 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_updater::Builder::new().build())?;
+
             let window = app.get_webview_window("main").unwrap();
 
             #[cfg(target_os = "macos")]
@@ -115,11 +121,14 @@ pub fn run() {
                     .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
             }
 
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                // 检测更新出错时只记录日志，不异常退出
-                let _ = update(handle).await;
-            });
+            #[cfg(desktop)]
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    // 检测更新出错时只记录日志，不异常退出
+                    let _ = update(handle).await;
+                });
+            }
 
             Ok(())
         })
