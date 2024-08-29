@@ -65,7 +65,7 @@ jobs:
 
       - name: get old nightly release id
         run: |
-          release_id=$(curl -s 'https://api.github.com/repos/alley-rs/fluxy/releases/tags/nightly' | awk -F'[{},:]+' '/^  "id"/ {print $2}' | xargs)
+          release_id=$(curl -s 'https://api.github.com/repos/alley-rs/lsar/releases/tags/nightly' | awk -F'[{},:]+' '/^  "id"/ {print $2}' | xargs)
           echo "RELEASE_ID=$release_id"  >> $GITHUB_ENV
 
       # - name: delete old nightly release
