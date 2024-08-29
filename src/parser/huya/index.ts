@@ -234,9 +234,11 @@ class Huya {
 
   async parse() {
     const roomID = await this.getFinalRoomID();
-    const result = await this.getRoomProfile(roomID);
+    if (roomID instanceof Error) {
+      return roomID;
+    }
 
-    console.log(result);
+    const result = await this.getRoomProfile(roomID);
 
     return result;
   }
