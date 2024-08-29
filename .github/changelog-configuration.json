@@ -1,0 +1,40 @@
+{
+  "categories": [
+    {
+      "title": "## 🎉 Features",
+      "labels": [
+        "feature"
+      ]
+    },
+    {
+      "title": "## 🚀 Enhancements",
+      "labels": [
+        "enhancement"
+      ]
+    },
+    {
+      "title": "## 🐛 Fixes",
+      "labels": [
+        "fix",
+        "bug"
+      ]
+    },
+    {
+      "title": "## 📦 Dependencies",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "title": "## 🛠 Breaking Changes",
+      "labels": [
+        "semver-major",
+        "breaking-change"
+      ]
+    }
+  ],
+  "pr_template": "- #{{TITLE}}(##{{NUMBER}})",
+  "base_branches": [
+    "main"
+  ]
+}
