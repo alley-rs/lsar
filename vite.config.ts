@@ -7,13 +7,17 @@ const host = process.env.TAURI_DEV_HOST;
 const pathSrc = path.resolve(__dirname, "src");
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async ({ mode }) => ({
   plugins: [solid()],
 
   resolve: {
     alias: {
       "~/": `${pathSrc}/`,
     },
+  },
+
+  esbuild: {
+    drop: mode === "production" ? ["console"] : [],
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
