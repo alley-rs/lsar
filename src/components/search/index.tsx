@@ -1,13 +1,19 @@
-import { Button, Flex, Input, Space, Tag } from "alley-components";
 import "./index.scss";
-import { children, createSignal, For, lazy, useContext } from "solid-js";
+import { children, createSignal, For, useContext } from "solid-js";
 import { platforms } from "~/parser";
 import Result from "./result";
 import { AiOutlineCheck } from "solid-icons/ai";
 import { AppContext } from "~/context";
 import BiliCookieEditor from "./bili-cookie";
-
-const Dialog = lazy(() => import("alley-components/lib/components/dialog"));
+import {
+  LazyButton,
+  LazyDialog,
+  LazyFlex,
+  LazyInput,
+  LazySpace,
+  LazySpaceCompact,
+  LazyTag,
+} from "~/lazy";
 
 const Search = () => {
   const [_, { setToast }, { config }, { parsedResult, setParsedResult }] =
@@ -41,12 +47,12 @@ const Search = () => {
         const item = platforms[key as Platform];
 
         return (
-          <Tag
+          <LazyTag
             color={currentPlatform() === key ? "#87d068" : "default"}
             onClick={() => selectPlatform(key as Platform)}
           >
             {item.label}
-          </Tag>
+          </LazyTag>
         );
       }}
     </For>
@@ -87,30 +93,30 @@ const Search = () => {
 
   return (
     <>
-      <Flex id="search" direction="vertical">
-        <Space.Compact>
-          <Input
+      <LazyFlex id="search" direction="vertical">
+        <LazySpaceCompact>
+          <LazyInput
             placeholder="输入房间号或直播间链接"
             value={input()}
             onInput={(v) => setInput(v)}
             disabled={loading()}
           />
-          <Button
+          <LazyButton
             icon={<AiOutlineCheck />}
             isLoading={loading()}
             disabled={!currentPlatform() || !input().length}
             onClick={onParse}
           />
-        </Space.Compact>
+        </LazySpaceCompact>
 
-        <Space gap={8} style={{ "margin-top": "1rem" }}>
+        <LazySpace gap={8} style={{ "margin-top": "1rem" }}>
           {buttons()}
-        </Space>
+        </LazySpace>
 
         <Result {...parsedResult()!} />
-      </Flex>
+      </LazyFlex>
 
-      <Dialog
+      <LazyDialog
         class="bili-cookie-dialog"
         title="输入 B 站 cookie"
         show={showBilibiliCookieEditor()}
@@ -118,7 +124,7 @@ const Search = () => {
         maskClosable={false}
       >
         <BiliCookieEditor onCancel={() => setShowBilibiliCookieEditor(false)} />
-      </Dialog>
+      </LazyDialog>
     </>
   );
 };

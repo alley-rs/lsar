@@ -1,20 +1,18 @@
-import {
-  Button,
-  Col,
-  Divider,
-  Flex,
-  Row,
-  Space,
-  Tooltip,
-  Typography,
-} from "alley-components";
 import { AiFillApi, AiFillChrome, AiFillDelete } from "solid-icons/ai";
 import { createSignal, Show, useContext } from "solid-js";
 import { deleteHistoryByID, open, readConfigFile } from "~/command";
 import { AppContext } from "~/context";
+import {
+  LazyButton,
+  LazyCol,
+  LazyDivider,
+  LazyFlex,
+  LazyRow,
+  LazySpace,
+  LazyText,
+  LazyTooltip,
+} from "~/lazy";
 import { platforms } from "~/parser";
-
-const { Text } = Typography;
 
 interface HistoryItemProps extends HistoryItem {
   onDelete: () => void;
@@ -51,36 +49,38 @@ const HistoryItem = (props: HistoryItemProps) => {
   };
 
   return (
-    <Flex class="history-item" direction="vertical">
+    <LazyFlex class="history-item" direction="vertical">
       <Show when={props.category} fallback={<h4>{props.last_title}</h4>}>
-        <Row class="history-item-header">
-          <Col span={18} align="center">
+        <LazyRow class="history-item-header">
+          <LazyCol span={18} align="center">
             <h4>{props.last_title}</h4>
-          </Col>
+          </LazyCol>
 
-          <Col span={6} justify="end" align="center">
-            <Text class="history-item-category" type="secondary" italic>
+          <LazyCol span={6} justify="end" align="center">
+            <LazyText class="history-item-category" type="secondary" italic>
               {props.category}
-            </Text>
-          </Col>
-        </Row>
+            </LazyText>
+          </LazyCol>
+        </LazyRow>
       </Show>
 
-      <Divider />
+      <LazyDivider />
 
-      <Row>
-        <Col span={14} align="center">
-          <Text>{props.anchor}</Text>
-        </Col>
+      <LazyRow>
+        <LazyCol span={14} align="center">
+          <LazyText>{props.anchor}</LazyText>
+        </LazyCol>
 
-        <Col span={4} align="center">
-          <Text type="secondary">{platforms[props.platform].label}</Text>
-        </Col>
+        <LazyCol span={4} align="center">
+          <LazyText type="secondary">
+            {platforms[props.platform].label}
+          </LazyText>
+        </LazyCol>
 
-        <Col span={6} align="center">
-          <Space>
-            <Tooltip text="解析本直播间" placement="bottom" delay={1000}>
-              <Button
+        <LazyCol span={6} align="center">
+          <LazySpace>
+            <LazyTooltip text="解析本直播间" placement="bottom" delay={1000}>
+              <LazyButton
                 isLoading={parsing()}
                 icon={<AiFillApi />}
                 type="plain"
@@ -88,10 +88,10 @@ const HistoryItem = (props: HistoryItemProps) => {
                 size="small"
                 onClick={onParse}
               />
-            </Tooltip>
+            </LazyTooltip>
 
-            <Tooltip text="在浏览器中打开" placement="bottom" delay={1000}>
-              <Button
+            <LazyTooltip text="在浏览器中打开" placement="bottom" delay={1000}>
+              <LazyButton
                 icon={<AiFillChrome />}
                 type="plain"
                 shape="circle"
@@ -100,10 +100,14 @@ const HistoryItem = (props: HistoryItemProps) => {
                   open(platforms[props.platform].roomBaseURL + props.room_id)
                 }
               />
-            </Tooltip>
+            </LazyTooltip>
 
-            <Tooltip text="删除本条历史记录" placement="bottom" delay={1000}>
-              <Button
+            <LazyTooltip
+              text="删除本条历史记录"
+              placement="bottom"
+              delay={1000}
+            >
+              <LazyButton
                 onClick={onDelete}
                 icon={<AiFillDelete />}
                 type="plain"
@@ -111,11 +115,11 @@ const HistoryItem = (props: HistoryItemProps) => {
                 size="small"
                 danger
               />
-            </Tooltip>
-          </Space>
-        </Col>
-      </Row>
-    </Flex>
+            </LazyTooltip>
+          </LazySpace>
+        </LazyCol>
+      </LazyRow>
+    </LazyFlex>
   );
 };
 

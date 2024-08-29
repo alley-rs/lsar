@@ -1,13 +1,3 @@
-import {
-  Button,
-  Col,
-  Divider,
-  Flex,
-  Label,
-  Row,
-  Space,
-  Tooltip,
-} from "alley-components";
 import { AiFillChrome, AiFillCopy, AiFillPlayCircle } from "solid-icons/ai";
 import { createEffect, For, Show, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -15,6 +5,16 @@ import { insertHistory, open, play } from "~/command";
 import { AppContext } from "~/context";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { platforms } from "~/parser";
+import {
+  LazyButton,
+  LazyCol,
+  LazyDivider,
+  LazyFlex,
+  LazyLabel,
+  LazyRow,
+  LazySpace,
+  LazyTooltip,
+} from "~/lazy";
 
 const Result = (props: ParsedResult) => {
   const [{ refetchHistoryItems }] = useContext(AppContext)!;
@@ -42,13 +42,13 @@ const Result = (props: ParsedResult) => {
   };
 
   return (
-    <Flex class="parsed-result" direction="vertical" gap={8}>
+    <LazyFlex class="parsed-result" direction="vertical" gap={8}>
       <Show when={links.length}>
-        <Space justify="between">
+        <LazySpace justify="between">
           <h3>{props.title}</h3>
 
-          <Tooltip text="浏览器中打开直播间" delay={1000}>
-            <Button
+          <LazyTooltip text="浏览器中打开直播间" delay={1000}>
+            <LazyButton
               icon={<AiFillChrome />}
               shape="circle"
               size="small"
@@ -57,22 +57,22 @@ const Result = (props: ParsedResult) => {
                 open(platforms[props.platform].roomBaseURL + props.roomID)
               }
             />
-          </Tooltip>
-        </Space>
+          </LazyTooltip>
+        </LazySpace>
 
-        <Space gap={16}>
-          <Space>
-            <Label>分类</Label>
+        <LazySpace gap={16}>
+          <LazySpace>
+            <LazyLabel>分类</LazyLabel>
             <span>{props.category ?? "无"}</span>
-          </Space>
+          </LazySpace>
 
-          <Space>
-            <Label>主播</Label>
+          <LazySpace>
+            <LazyLabel>主播</LazyLabel>
             <span>{props.anchor}</span>
-          </Space>
-        </Space>
+          </LazySpace>
+        </LazySpace>
 
-        <Divider
+        <LazyDivider
           dashed
           style={{ "--alley-color-split": "#fff", margin: "8px 0" }}
         />
@@ -80,38 +80,42 @@ const Result = (props: ParsedResult) => {
         <div class="parsed-links">
           <For each={links}>
             {(link, index) => (
-              <Row>
-                <Col span={21} align="center">
+              <LazyRow>
+                <LazyCol span={21} align="center">
                   <span class="link">{link}</span>
-                </Col>
+                </LazyCol>
 
-                <Col span={3} align="center" justify="end">
-                  <Tooltip text="播放此直播流" delay={1000} placement="bottom">
-                    <Button
+                <LazyCol span={3} align="center" justify="end">
+                  <LazyTooltip
+                    text="播放此直播流"
+                    delay={1000}
+                    placement="bottom"
+                  >
+                    <LazyButton
                       icon={<AiFillPlayCircle />}
                       shape="circle"
                       size="small"
                       type="plain"
                       onClick={() => onPlay(index())}
                     />
-                  </Tooltip>
+                  </LazyTooltip>
 
-                  <Tooltip text="复制链接" delay={1000} placement="bottom">
-                    <Button
+                  <LazyTooltip text="复制链接" delay={1000} placement="bottom">
+                    <LazyButton
                       icon={<AiFillCopy />}
                       shape="circle"
                       size="small"
                       type="plain"
                       onClick={() => writeText(link)}
                     />
-                  </Tooltip>
-                </Col>
-              </Row>
+                  </LazyTooltip>
+                </LazyCol>
+              </LazyRow>
             )}
           </For>
         </div>
       </Show>
-    </Flex>
+    </LazyFlex>
   );
 };
 

@@ -1,9 +1,7 @@
-import { Button, Flex, Input } from "alley-components";
 import { createSignal, useContext } from "solid-js";
 import { writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
-
-const { TextArea } = Input;
+import { LazyButton, LazyFlex, LazyTextArea } from "~/lazy";
 
 interface BiliCookieEditorProps {
   onCancel: () => void;
@@ -27,21 +25,21 @@ const BiliCookieEditor = (props: BiliCookieEditorProps) => {
 
   return (
     <>
-      <TextArea rows={6} value={cookie()} onInput={(s) => setCookie(s)} />
+      <LazyTextArea rows={6} value={cookie()} onInput={(s) => setCookie(s)} />
 
-      <Flex justify="round">
-        <Button danger onClick={props.onCancel}>
+      <LazyFlex justify="round">
+        <LazyButton danger onClick={props.onCancel}>
           取消
-        </Button>
-        <Button
+        </LazyButton>
+        <LazyButton
           onClick={onConfirm}
           disabled={
             !cookie() || config()?.platform.bilibili.cookie === cookie()
           }
         >
           确认
-        </Button>
-      </Flex>
+        </LazyButton>
+      </LazyFlex>
     </>
   );
 };

@@ -1,17 +1,15 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import {
-  Button,
-  Dialog,
-  Flex,
-  Label,
-  Space,
-  Typography,
-} from "alley-components";
 import { createSignal, Show, useContext } from "solid-js";
 import { writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
-
-const { Text } = Typography;
+import {
+  LazyButton,
+  LazyDialog,
+  LazyFlex,
+  LazyLabel,
+  LazySpace,
+  LazyText,
+} from "~/lazy";
 
 const Settings = () => {
   const { config, refetchConfig } = useContext(AppContext)![2];
@@ -46,42 +44,42 @@ const Settings = () => {
   };
 
   return (
-    <Dialog
+    <LazyDialog
       show={!config()?.player.path}
       onClose={() => {}}
       maskClosable={false}
     >
-      <Flex direction="vertical" gap={8}>
-        <Space justify="around">
-          <Label>播放器绝对路径</Label>
+      <LazyFlex direction="vertical" gap={8}>
+        <LazySpace justify="around">
+          <LazyLabel>播放器绝对路径</LazyLabel>
 
           <Show when={path()}>
-            <Text type="secondary" style={{ "margin-right": "8px" }}>
+            <LazyText type="secondary" style={{ "margin-right": "8px" }}>
               {path()}
-            </Text>
+            </LazyText>
           </Show>
 
-          <Button size="small" onClick={onSelectFile}>
+          <LazyButton size="small" onClick={onSelectFile}>
             <Show when={!path()} fallback={"重新选择"}>
               选择文件
             </Show>
-          </Button>
-        </Space>
+          </LazyButton>
+        </LazySpace>
 
-        <Space justify="around">
-          <Button
+        <LazySpace justify="around">
+          <LazyButton
             danger
             onClick={onCancel}
             disabled={!config()?.player.path || !path()}
           >
             取消
-          </Button>
-          <Button onClick={onOk} disabled={!path()}>
+          </LazyButton>
+          <LazyButton onClick={onOk} disabled={!path()}>
             确认
-          </Button>
-        </Space>
-      </Flex>
-    </Dialog>
+          </LazyButton>
+        </LazySpace>
+      </LazyFlex>
+    </LazyDialog>
   );
 };
 

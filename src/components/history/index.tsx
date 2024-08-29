@@ -1,8 +1,8 @@
 import { For, lazy, Show, useContext } from "solid-js";
 import HistoryItem from "./item";
-import { Flex } from "alley-components";
 import "./index.scss";
 import { AppContext } from "~/context";
+import { LazyFlex } from "~/lazy";
 
 const LazyEmpty = lazy(() => import("alley-components/lib/components/empty"));
 
@@ -14,7 +14,7 @@ const History = (props: HistoryProps) => {
   const [{ refetchHistoryItems }] = useContext(AppContext)!;
 
   return (
-    <Flex
+    <LazyFlex
       id="history"
       class={props.items?.length ? undefined : "history-empty"}
       direction="vertical"
@@ -29,7 +29,7 @@ const History = (props: HistoryProps) => {
           )}
         </For>
       </Show>
-    </Flex>
+    </LazyFlex>
   );
 };
 

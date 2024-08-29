@@ -4,8 +4,8 @@ import { getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
 import Search from "./components/search";
 import { AppContext } from "./context";
-import { Toast } from "alley-components";
 import Settings from "./components/settings";
+import { LazyToast } from "./lazy";
 
 const App = () => {
   const [items, { refetch: refetchHistoryItems }] =
@@ -34,7 +34,7 @@ const App = () => {
         <Settings />
       </AppContext.Provider>
 
-      <Toast
+      <LazyToast
         open={!!toast()}
         placement="bottom"
         alert={{
