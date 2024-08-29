@@ -5,6 +5,10 @@ import "./index.scss";
 import App from "./App";
 import * as buffer from "buffer"; // 浏览器中无 Buffer，需要安装并挂到 window 上
 
+if (import.meta.env.MODE === "production") {
+  document.addEventListener("contextmenu", (event) => event.preventDefault());
+}
+
 if (typeof window.Buffer === "undefined") {
   window.Buffer = buffer.Buffer;
 }
