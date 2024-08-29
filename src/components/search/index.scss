@@ -28,7 +28,17 @@
     }
   }
 
+  .parsed-result-header {
+    flex: 1;
+  }
+
+  .parsed-links-wrapper {
+    flex: 8;
+  }
+
   .parsed-links {
+    flex: 8;
+
     .link {
       color: var(--alley-color-primary);
       overflow: hidden;
@@ -40,6 +50,10 @@
         cursor: pointer;
       }
     }
+  }
+
+  .parsed-links-note {
+    flex: 1;
   }
 }
 
