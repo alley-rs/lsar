@@ -12,6 +12,16 @@
     .alley-divider-horizontal {
       margin: 4px 0;
     }
+
+    .alley-typography-secondary {
+      font-size: 0.8rem;
+    }
+
+    .row {
+      & > div.col {
+        min-height: inherit;
+      }
+    }
   }
 
   &.history-empty {

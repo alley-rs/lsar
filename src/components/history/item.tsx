@@ -1,13 +1,15 @@
 import {
   Button,
+  Col,
   Divider,
   Flex,
+  Row,
   Space,
   Tooltip,
   Typography,
 } from "alley-components";
 import { AiFillApi, AiFillChrome, AiFillDelete } from "solid-icons/ai";
-import { createSignal, useContext } from "solid-js";
+import { createSignal, Show, useContext } from "solid-js";
 import { deleteHistoryByID, open, readConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import { platforms } from "~/parser";
@@ -50,56 +52,69 @@ const HistoryItem = (props: HistoryItemProps) => {
 
   return (
     <Flex class="history-item" direction="vertical">
-      <Space gap={8} justify="between">
-        <h4>{props.last_title}</h4>
-        <Text type="secondary" italic>
-          {props.category}
-        </Text>
-      </Space>
+      <Show when={props.category} fallback={<h4>{props.last_title}</h4>}>
+        <Row class="history-item-header">
+          <Col span={18} align="center">
+            <h4>{props.last_title}</h4>
+          </Col>
+
+          <Col span={6} justify="end" align="center">
+            <Text class="history-item-category" type="secondary" italic>
+              {props.category}
+            </Text>
+          </Col>
+        </Row>
+      </Show>
 
       <Divider />
 
-      <Space justify="between">
-        <Text>{props.anchor}</Text>
+      <Row>
+        <Col span={14} align="center">
+          <Text>{props.anchor}</Text>
+        </Col>
 
-        <Text type="secondary">{platforms[props.platform].label}</Text>
+        <Col span={4} align="center">
+          <Text type="secondary">{platforms[props.platform].label}</Text>
+        </Col>
 
-        <Space>
-          <Tooltip text="解析本直播间" placement="bottom" delay={1000}>
-            <Button
-              isLoading={parsing()}
-              icon={<AiFillApi />}
-              type="plain"
-              shape="circle"
-              size="small"
-              onClick={onParse}
-            />
-          </Tooltip>
+        <Col span={6} align="center">
+          <Space>
+            <Tooltip text="解析本直播间" placement="bottom" delay={1000}>
+              <Button
+                isLoading={parsing()}
+                icon={<AiFillApi />}
+                type="plain"
+                shape="circle"
+                size="small"
+                onClick={onParse}
+              />
+            </Tooltip>
 
-          <Tooltip text="在浏览器中打开" placement="bottom" delay={1000}>
-            <Button
-              icon={<AiFillChrome />}
-              type="plain"
-              shape="circle"
-              size="small"
-              onClick={() =>
-                open(platforms[props.platform].roomBaseURL + props.room_id)
-              }
-            />
-          </Tooltip>
+            <Tooltip text="在浏览器中打开" placement="bottom" delay={1000}>
+              <Button
+                icon={<AiFillChrome />}
+                type="plain"
+                shape="circle"
+                size="small"
+                onClick={() =>
+                  open(platforms[props.platform].roomBaseURL + props.room_id)
+                }
+              />
+            </Tooltip>
 
-          <Tooltip text="删除本条历史记录" placement="bottom" delay={1000}>
-            <Button
-              onClick={onDelete}
-              icon={<AiFillDelete />}
-              type="plain"
-              shape="circle"
-              size="small"
-              danger
-            />
-          </Tooltip>
-        </Space>
-      </Space>
+            <Tooltip text="删除本条历史记录" placement="bottom" delay={1000}>
+              <Button
+                onClick={onDelete}
+                icon={<AiFillDelete />}
+                type="plain"
+                shape="circle"
+                size="small"
+                danger
+              />
+            </Tooltip>
+          </Space>
+        </Col>
+      </Row>
     </Flex>
   );
 };
