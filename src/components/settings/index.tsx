@@ -1,8 +1,17 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import { Button, Dialog, Flex, Label, Space } from "alley-components";
+import {
+  Button,
+  Dialog,
+  Flex,
+  Label,
+  Space,
+  Typography,
+} from "alley-components";
 import { createSignal, Show, useContext } from "solid-js";
 import { writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
+
+const { Text } = Typography;
 
 const Settings = () => {
   const { config, refetchConfig } = useContext(AppContext)![2];
@@ -39,17 +48,24 @@ const Settings = () => {
   return (
     <Dialog
       show={!config()?.player.path}
-      onClose={() => { }}
+      onClose={() => {}}
       maskClosable={false}
     >
       <Flex direction="vertical" gap={8}>
-        <Space>
+        <Space justify="around">
           <Label>播放器绝对路径</Label>
-          <Show when={!path()} fallback={<span>{path()}</span>}>
-            <Button size="small" onClick={onSelectFile}>
-              选择文件
-            </Button>
+
+          <Show when={path()}>
+            <Text type="secondary" style={{ "margin-right": "8px" }}>
+              {path()}
+            </Text>
           </Show>
+
+          <Button size="small" onClick={onSelectFile}>
+            <Show when={!path()} fallback={"重新选择"}>
+              选择文件
+            </Show>
+          </Button>
         </Space>
 
         <Space justify="around">
