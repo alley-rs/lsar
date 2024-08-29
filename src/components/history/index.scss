@@ -13,4 +13,14 @@
       margin: 4px 0;
     }
   }
+
+  &.history-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .empty {
+      opacity: 0.5;
+    }
+  }
 }
