@@ -30,10 +30,15 @@
 
   .parsed-links {
     .link {
-      color: #fff;
+      color: var(--alley-color-primary);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 }

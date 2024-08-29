@@ -81,8 +81,8 @@ const Result = (props: ParsedResult) => {
           <For each={links}>
             {(link, index) => (
               <Row>
-                <Col span={21} class="link" align="center">
-                  {link.slice(0, 47)}...
+                <Col span={21} align="center">
+                  <span class="link">{link}</span>
                 </Col>
 
                 <Col span={3} align="center" justify="end">
