@@ -23,4 +23,8 @@ type AppContext = [
     parsedResult: Accessor<ParsedResult | null>;
     setParsedResult: Setter<ParsedResult | null>;
   },
+  {
+    showBilibiliCookieEditor: Accessor<boolean>;
+    setShowBilibiliCookieEditor: Setter<boolean>;
+  },
 ];

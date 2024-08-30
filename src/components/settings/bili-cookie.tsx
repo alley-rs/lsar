@@ -1,14 +1,16 @@
-import { createSignal, useContext } from "solid-js";
+import { createSignal } from "solid-js";
 import { writeConfigFile } from "~/command";
-import { AppContext } from "~/context";
+import { useAppContext } from "~/context";
 import { LazyButton, LazyFlex, LazyTextArea } from "~/lazy";
 
-interface BiliCookieEditorProps {
-  onCancel: () => void;
-}
-
-const BiliCookieEditor = (props: BiliCookieEditorProps) => {
-  const { config, refetchConfig } = useContext(AppContext)![2];
+const BiliCookieEditor = () => {
+  const [
+    _,
+    __,
+    { config, refetchConfig },
+    ___,
+    { setShowBilibiliCookieEditor },
+  ] = useAppContext();
 
   const [cookie, setCookie] = createSignal(config()?.platform.bilibili.cookie);
 
@@ -20,7 +22,7 @@ const BiliCookieEditor = (props: BiliCookieEditorProps) => {
 
     await writeConfigFile(newConfig);
     refetchConfig();
-    props.onCancel();
+    setShowBilibiliCookieEditor(false);
   };
 
   return (
@@ -28,7 +30,7 @@ const BiliCookieEditor = (props: BiliCookieEditorProps) => {
       <LazyTextArea rows={6} value={cookie()} onInput={(s) => setCookie(s)} />
 
       <LazyFlex justify="round">
-        <LazyButton danger onClick={props.onCancel}>
+        <LazyButton danger onClick={() => setShowBilibiliCookieEditor(false)}>
           取消
         </LazyButton>
         <LazyButton

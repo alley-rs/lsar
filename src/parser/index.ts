@@ -53,3 +53,37 @@ export const handleParsingError = (error: unknown): Error => {
       return error as Error;
   }
 };
+
+export const parse = async (
+  platform: Platform,
+  input: string,
+  config: Config,
+  setShowBilibiliCookieEditor: Setter<boolean>,
+  setToast: AppContext[1]["setToast"],
+  setParsedResult: AppContext[3]["setParsedResult"],
+) => {
+  let result: ParsedResult | Error | null = null;
+
+  try {
+    if (platform === "bilibili") {
+      if (!config.platform.bilibili.cookie.length) {
+        setShowBilibiliCookieEditor(true);
+      } else {
+        result = await platforms.bilibili.parser(
+          input,
+          config.platform.bilibili.cookie,
+        );
+      }
+    } else {
+      result = await platforms[platform!].parser(input);
+    }
+  } catch (e) {
+    result = handleParsingError(e);
+  }
+
+  if (result instanceof Error) {
+    setToast({ type: "error", message: result.message });
+  } else if (result) {
+    setParsedResult(result);
+  }
+};

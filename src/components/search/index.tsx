@@ -1,12 +1,10 @@
 import "./index.scss";
-import { children, createSignal, For, useContext } from "solid-js";
-import { handleParsingError, platforms } from "~/parser";
+import { children, createSignal, For } from "solid-js";
+import { parse, platforms } from "~/parser";
 import { AiOutlineCheck } from "solid-icons/ai";
-import { AppContext } from "~/context";
-import BiliCookieEditor from "./bili-cookie";
+import { useAppContext } from "~/context";
 import {
   LazyButton,
-  LazyDialog,
   LazyFlex,
   LazyInput,
   LazySpace,
@@ -15,8 +13,13 @@ import {
 } from "~/lazy";
 
 const Search = () => {
-  const [_, { setToast }, { config }, { setParsedResult }] =
-    useContext(AppContext)!;
+  const [
+    _,
+    { setToast },
+    { config },
+    { setParsedResult },
+    { setShowBilibiliCookieEditor },
+  ] = useAppContext();
 
   const [input, setInput] = createSignal("");
   const [currentPlatform, setCurrentPlatform] = createSignal<Platform | null>(
@@ -24,9 +27,6 @@ const Search = () => {
   );
 
   const [loading, setLoading] = createSignal(false);
-
-  const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
-    createSignal(false);
 
   const resetParseResult = () => setParsedResult(null);
   const resetInput = () => setInput("");
@@ -60,32 +60,14 @@ const Search = () => {
   const onParse = async () => {
     setLoading(true);
 
-    const platform = currentPlatform();
-
-    let result: ParsedResult | Error | null = null;
-
-    try {
-      if (platform === "bilibili") {
-        if (!config()?.platform.bilibili.cookie.length) {
-          setShowBilibiliCookieEditor(true);
-        } else {
-          result = await platforms.bilibili.parser(
-            input(),
-            config()!.platform.bilibili.cookie,
-          );
-        }
-      } else {
-        result = await platforms[platform!].parser(input());
-      }
-    } catch (e) {
-      result = handleParsingError(e);
-    }
-
-    if (result instanceof Error) {
-      setToast({ type: "error", message: result.message });
-    } else if (result) {
-      setParsedResult(result);
-    }
+    await parse(
+      currentPlatform()!,
+      input(),
+      config()!,
+      setShowBilibiliCookieEditor,
+      setToast,
+      setParsedResult,
+    );
 
     setLoading(false);
   };
@@ -112,16 +94,6 @@ const Search = () => {
           {buttons()}
         </LazySpace>
       </LazyFlex>
-
-      <LazyDialog
-        class="bili-cookie-dialog"
-        title="输入 B 站 cookie"
-        show={showBilibiliCookieEditor()}
-        onClose={() => setShowBilibiliCookieEditor(false)}
-        maskClosable={false}
-      >
-        <BiliCookieEditor onCancel={() => setShowBilibiliCookieEditor(false)} />
-      </LazyDialog>
     </>
   );
 };
