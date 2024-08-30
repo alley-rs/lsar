@@ -1,11 +1,12 @@
-import { createResource, createSignal } from "solid-js";
-import "./App.scss";
+import { createResource, createSignal, Show } from "solid-js";
+import { LazyFlex, LazyToast } from "./lazy";
+import { AppContext } from "./context";
 import { getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
 import Search from "./components/search";
-import { AppContext } from "./context";
 import Settings from "./components/settings";
-import { LazyToast } from "./lazy";
+import Result from "./components/result";
+import "./App.scss";
 
 const App = () => {
   const [items, { refetch: refetchHistoryItems }] =
@@ -29,7 +30,15 @@ const App = () => {
       >
         <History items={items()} />
 
-        <Search />
+        <LazyFlex id="right" direction="vertical">
+          <Search />
+
+          <LazyFlex class="parsed-result" direction="vertical" gap={8}>
+            <Show when={parsedResult()?.links.length}>
+              <Result {...parsedResult()!} />
+            </Show>
+          </LazyFlex>
+        </LazyFlex>
 
         <Settings />
       </AppContext.Provider>
