@@ -1,7 +1,6 @@
 import "./index.scss";
 import { children, createSignal, For, useContext } from "solid-js";
 import { platforms } from "~/parser";
-import Result from "./result";
 import { AiOutlineCheck } from "solid-icons/ai";
 import { AppContext } from "~/context";
 import BiliCookieEditor from "./bili-cookie";
@@ -16,7 +15,7 @@ import {
 } from "~/lazy";
 
 const Search = () => {
-  const [_, { setToast }, { config }, { parsedResult, setParsedResult }] =
+  const [_, { setToast }, { config }, { setParsedResult }] =
     useContext(AppContext)!;
 
   const [input, setInput] = createSignal("");
@@ -112,8 +111,6 @@ const Search = () => {
         <LazySpace gap={8} style={{ "margin-top": "1rem" }}>
           {buttons()}
         </LazySpace>
-
-        <Result {...parsedResult()!} />
       </LazyFlex>
 
       <LazyDialog
