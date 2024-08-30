@@ -64,7 +64,7 @@ const Result = (props: ParsedResult) => {
         <LazySpace justify="between">
           <h3>{props.title}</h3>
 
-          <LazyTooltip text="浏览器中打开直播间" delay={1000}>
+          <LazyTooltip text="在浏览器中打开此直播间" delay={1000}>
             <LazyButton
               icon={<AiFillChrome />}
               shape="circle"
