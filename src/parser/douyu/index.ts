@@ -112,7 +112,16 @@ class Douyu {
 
   private async matchSignFunc(html: string) {
     const matchResult = html.match(this.ub98484234Reg);
-    if (matchResult == null) throw Error("没找到函数 ub98484234");
+    if (matchResult == null) {
+      if (html.indexOf('<div class="error">') > -1) {
+        const errorMatch = html.match(/<span><p>(.+?)<\/p><\/span>/);
+        if (errorMatch) {
+          return Error(errorMatch[1]);
+        }
+      }
+
+      throw Error("没找到函数 ub98484234");
+    }
 
     let ub98484234 = matchResult[0];
     ub98484234 = ub98484234.replace(/eval\(strc\)\(\w+,\w+,.\w+\);/, "strc;");

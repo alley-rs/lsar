@@ -45,9 +45,11 @@ export const handleParsingError = (error: unknown): Error => {
       return new Error("网络连接超时");
     case "http error: Decode":
       return new Error("解码响应失败");
-    default:
+    case "http error: Other":
       return new Error(
         "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues",
       );
+    default:
+      return error as Error;
   }
 };
