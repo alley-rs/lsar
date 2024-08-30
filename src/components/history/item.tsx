@@ -90,7 +90,11 @@ const HistoryItem = (props: HistoryItemProps) => {
               />
             </LazyTooltip>
 
-            <LazyTooltip text="在浏览器中打开" placement="bottom" delay={1000}>
+            <LazyTooltip
+              text="在浏览器中打开此直播间"
+              placement="bottom"
+              delay={1000}
+            >
               <LazyButton
                 icon={<AiFillChrome />}
                 type="plain"
