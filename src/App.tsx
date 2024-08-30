@@ -16,7 +16,7 @@ const App = () => {
 
   const [toast, setToast] = createSignal<Toast | null>(null);
   const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
-    null,
+    null
   );
 
   const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
@@ -28,6 +28,8 @@ const App = () => {
 
   return (
     <>
+      <div data-tauri-drag-region class="titlebar" />
+
       <AppContext.Provider
         value={[
           { refetchHistoryItems },
@@ -37,29 +39,31 @@ const App = () => {
           { showBilibiliCookieEditor, setShowBilibiliCookieEditor },
         ]}
       >
-        <History items={items()} />
+        <LazyFlex>
+          <History items={items()} />
 
-        <LazyFlex id="right" direction="vertical">
-          <Search />
+          <LazyFlex id="right" direction="vertical">
+            <Search />
 
-          <LazyFlex class="parsed-result" direction="vertical" gap={8}>
-            <Show when={parsedResult()?.links.length}>
-              <Result {...parsedResult()!} />
-            </Show>
+            <LazyFlex class="parsed-result" direction="vertical" gap={8}>
+              <Show when={parsedResult()?.links.length}>
+                <Result {...parsedResult()!} />
+              </Show>
+            </LazyFlex>
           </LazyFlex>
+
+          <Settings />
+
+          <LazyDialog
+            class="bili-cookie-dialog"
+            title="输入 B 站 cookie"
+            show={showBilibiliCookieEditor()}
+            onClose={() => setShowBilibiliCookieEditor(false)}
+            maskClosable={false}
+          >
+            <BiliCookieEditor />
+          </LazyDialog>
         </LazyFlex>
-
-        <Settings />
-
-        <LazyDialog
-          class="bili-cookie-dialog"
-          title="输入 B 站 cookie"
-          show={showBilibiliCookieEditor()}
-          onClose={() => setShowBilibiliCookieEditor(false)}
-          maskClosable={false}
-        >
-          <BiliCookieEditor />
-        </LazyDialog>
       </AppContext.Provider>
 
       <LazyToast
