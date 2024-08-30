@@ -1,5 +1,5 @@
 import { createResource, createSignal, onMount, Show } from "solid-js";
-import { LazyFlex, LazyToast } from "./lazy";
+import { LazyDialog, LazyFlex, LazyToast } from "./lazy";
 import { AppContext } from "./context";
 import { showMainWindow, getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
@@ -7,6 +7,7 @@ import Search from "./components/search";
 import Settings from "./components/settings";
 import Result from "./components/result";
 import "./App.scss";
+import BiliCookieEditor from "./components/settings/bili-cookie";
 
 const App = () => {
   const [items, { refetch: refetchHistoryItems }] =
@@ -17,6 +18,9 @@ const App = () => {
   const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
     null,
   );
+
+  const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
+    createSignal(false);
 
   onMount(() => {
     showMainWindow();
@@ -30,6 +34,7 @@ const App = () => {
           { toast, setToast },
           { config, refetchConfig },
           { parsedResult, setParsedResult },
+          { showBilibiliCookieEditor, setShowBilibiliCookieEditor },
         ]}
       >
         <History items={items()} />
@@ -45,6 +50,16 @@ const App = () => {
         </LazyFlex>
 
         <Settings />
+
+        <LazyDialog
+          class="bili-cookie-dialog"
+          title="输入 B 站 cookie"
+          show={showBilibiliCookieEditor()}
+          onClose={() => setShowBilibiliCookieEditor(false)}
+          maskClosable={false}
+        >
+          <BiliCookieEditor />
+        </LazyDialog>
       </AppContext.Provider>
 
       <LazyToast
