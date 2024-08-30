@@ -1,6 +1,5 @@
 import { AiFillChrome, AiFillCopy, AiFillPlayCircle } from "solid-icons/ai";
-import { createEffect, For, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import { For, useContext } from "solid-js";
 import { insertHistory, open, play } from "~/command";
 import { AppContext } from "~/context";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
@@ -19,17 +18,25 @@ import {
 import "./index.scss";
 
 const Result = (props: ParsedResult) => {
-  const [{ refetchHistoryItems }, { setToast }] = useContext(AppContext)!;
+  const [
+    { refetchHistoryItems },
+    { setToast },
+    _,
+    { parsedResult, setParsedResult },
+  ] = useContext(AppContext)!;
 
-  const [links, setLinks] = createStore<string[]>([]);
-
-  createEffect(() => setLinks(props.links ?? []));
+  const removeLink = (index: number) => {
+    setParsedResult((prev) => ({
+      ...prev!,
+      links: prev!.links.filter((_, idx) => idx !== index),
+    }));
+  };
 
   const onPlay = async (index: number) => {
     await play(props!.links[index]);
 
     // 解析出来的链接只能访问一次，访问后即删除
-    setLinks((prev) => prev.filter((_, idx) => index !== idx));
+    removeLink(index);
 
     await insertHistory({
       id: 0,
@@ -90,7 +97,7 @@ const Result = (props: ParsedResult) => {
 
       <LazyFlex direction="vertical" class="parsed-links-wrapper">
         <div class="parsed-links">
-          <For each={links}>
+          <For each={parsedResult()?.links}>
             {(link, index) => (
               <LazyRow>
                 <LazyCol span={21} align="center">
