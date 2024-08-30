@@ -14,7 +14,7 @@ mod utils;
 extern crate tracing;
 
 use error::LsarResult;
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 use time::macros::{format_description, offset};
 use tracing::Level;
 use tracing_subscriber::fmt::time::OffsetTime;
@@ -37,6 +37,14 @@ async fn play(url: String) -> LsarResult<()> {
 #[tauri::command]
 async fn open(url: String) -> LsarResult<()> {
     open::that(url).map_err(Into::into)
+}
+
+/// 防止启动时闪白屏
+#[tauri::command]
+async fn show_main_window(app: AppHandle) {
+    let main_window = app.get_webview_window("main").unwrap();
+
+    main_window.show().unwrap();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -86,6 +94,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .setup(setup)
         .invoke_handler(tauri::generate_handler![
+            show_main_window,
             get_all_history,
             insert_a_history,
             delete_a_history_by_id,

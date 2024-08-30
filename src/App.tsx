@@ -1,7 +1,7 @@
-import { createResource, createSignal, Show } from "solid-js";
+import { createResource, createSignal, onMount, Show } from "solid-js";
 import { LazyFlex, LazyToast } from "./lazy";
 import { AppContext } from "./context";
-import { getAllHistory, readConfigFile } from "./command";
+import { showMainWindow, getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
 import Search from "./components/search";
 import Settings from "./components/settings";
@@ -17,6 +17,10 @@ const App = () => {
   const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
     null,
   );
+
+  onMount(() => {
+    showMainWindow();
+  });
 
   return (
     <>
