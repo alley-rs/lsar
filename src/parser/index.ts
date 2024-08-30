@@ -35,3 +35,19 @@ export const platforms = {
 //   { value: "douyin", label: "抖音" },
 //   { value: "bilibili", label: "B 站" },
 // ];
+
+export const handleParsingError = (error: unknown): Error => {
+  const errorMessage = String(error);
+  switch (errorMessage) {
+    case "http error: Connect":
+      return new Error("网络连接异常");
+    case "http error: Timeout":
+      return new Error("网络连接超时");
+    case "http error: Decode":
+      return new Error("解码响应失败");
+    default:
+      return new Error(
+        "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues",
+      );
+  }
+};

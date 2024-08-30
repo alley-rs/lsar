@@ -1,6 +1,6 @@
 import "./index.scss";
 import { children, createSignal, For, useContext } from "solid-js";
-import { platforms } from "~/parser";
+import { handleParsingError, platforms } from "~/parser";
 import { AiOutlineCheck } from "solid-icons/ai";
 import { AppContext } from "~/context";
 import BiliCookieEditor from "./bili-cookie";
@@ -64,26 +64,26 @@ const Search = () => {
 
     let result: ParsedResult | Error | null = null;
 
-    if (platform === "bilibili") {
-      if (!config()?.platform.bilibili.cookie.length) {
-        setShowBilibiliCookieEditor(true);
+    try {
+      if (platform === "bilibili") {
+        if (!config()?.platform.bilibili.cookie.length) {
+          setShowBilibiliCookieEditor(true);
+        } else {
+          result = await platforms.bilibili.parser(
+            input(),
+            config()!.platform.bilibili.cookie,
+          );
+        }
       } else {
-        result = await platforms.bilibili.parser(
-          input(),
-          config()!.platform.bilibili.cookie,
-        );
+        result = await platforms[platform!].parser(input());
       }
-    } else {
-      result = await platforms[platform!].parser(input());
+    } catch (e) {
+      result = handleParsingError(e);
     }
 
-    if (result) {
-      if (result instanceof Error) {
-        setToast({ type: "error", message: result.message });
-        setLoading(false);
-        return;
-      }
-
+    if (result instanceof Error) {
+      setToast({ type: "error", message: result.message });
+    } else if (result) {
       setParsedResult(result);
     }
 
