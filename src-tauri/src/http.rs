@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use tauri::http::HeaderValue;
 
-use crate::error::LsarResult;
+use crate::error::{LsarError, LsarResult};
 
 type JsonMap = Map<String, Value>;
 
@@ -39,18 +39,18 @@ impl ResponseHandler for reqwest::Response {
             if ct.to_str().map(|s| s.contains("json")).unwrap_or(false) {
                 self.json().await.map_err(|e| {
                     error!(message = "Failed to parse JSON response", error = ?e);
-                    e
+                    LsarError::Http(e.into())
                 })?
             } else {
                 Value::String(self.text().await.map_err(|e| {
                     error!(message = "Failed to get text response", error = ?e);
-                    e
+                    LsarError::Http(e.into())
                 })?)
             }
         } else {
             Value::String(self.text().await.map_err(|e| {
                 error!(message = "Failed to get text response", error = ?e);
-                e
+                LsarError::Http(e.into())
             })?)
         };
 
@@ -84,7 +84,7 @@ pub async fn get(url: String, headers: HashMap<String, String>) -> LsarResult<Re
         .await
         .map_err(|e| {
             error!(message = "Failed to send request", error = ?e);
-            e
+            LsarError::Http(e.into())
         })?
         .handle_response()
         .await
@@ -119,7 +119,11 @@ pub async fn post(
         .body(body)
         .header(CONTENT_TYPE, content_type)
         .send()
-        .await?
+        .await
+        .map_err(|e| {
+            error!(message = "Failed to send request", error = ?e);
+            LsarError::Http(e.into())
+        })?
         .handle_response()
         .await
 }
