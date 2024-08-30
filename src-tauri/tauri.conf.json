@@ -48,8 +48,6 @@
       "endpoints": [
         "https://app.thepoy.cc/lsar/latest-mirror-1.json",
         "https://app.thepoy.cc/lsar/latest-mirror-2.json",
-        "https://app.thepoy.cc/lsar/latest-mirror-3.json",
-        "https://app.thepoy.cc/lsar/latest-mirror-4.json",
         "https://github.com/alley-rs/lsar/releases/latest/download/latest.json"
       ]
     }

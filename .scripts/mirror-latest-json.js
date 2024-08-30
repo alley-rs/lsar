@@ -4,8 +4,6 @@ import path from "path";
 const mirrors = [
   { host: "mirror.ghproxy.com", prefix: true },
   { host: "kkgithub.com" },
-  { host: "521github.com" },
-  { host: "hub.yzuu.cf" },
 ];
 
 const GITHUB = "https://github.com/";
@@ -14,11 +12,11 @@ const mirrorContent = (mirror, text) => {
   if (mirror.prefix) {
     return text.replaceAll(
       GITHUB,
-      `https://${mirror.host}/https://github.com/`,
+      `https://${mirror.host}/https://github.com/`
     );
-  } else {
-    return text.replaceAll(GITHUB, `https://${mirror.host}/`);
   }
+
+  return text.replaceAll(GITHUB, `https://${mirror.host}/`);
 };
 
 const newMirrorJSON = (text, mirror, filepath) => {
@@ -53,7 +51,7 @@ const run = async () => {
   }
 
   mirrors.forEach((m, i) =>
-    newMirrorJSON(text, m, path.join(targetDir, `latest-mirror-${i + 1}.json`)),
+    newMirrorJSON(text, m, path.join(targetDir, `latest-mirror-${i + 1}.json`))
   );
 };
 
