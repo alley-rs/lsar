@@ -8,6 +8,7 @@ import Settings from "./components/settings";
 import Result from "./components/result";
 import "./App.scss";
 import BiliCookieEditor from "./components/settings/bili-cookie";
+import About from "./components/about";
 
 const TitleBar =
   import.meta.env.TAURI_PLATFORM === "macos"
@@ -84,6 +85,8 @@ const App = () => {
         }}
         onClose={() => setToast(null)}
       />
+
+      <About />
     </>
   );
 };
