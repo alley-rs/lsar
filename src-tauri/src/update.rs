@@ -38,6 +38,8 @@ pub async fn update(app: tauri::AppHandle) -> LsarResult<()> {
 
         info!("更新已安装，即将重启程序");
         app.restart();
+    } else {
+        info!("当前已是最新版");
     }
 
     Ok(())
