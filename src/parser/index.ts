@@ -47,7 +47,7 @@ export const handleParsingError = (error: unknown): Error => {
       return new Error("解码响应失败");
     case "http error: Other":
       return new Error(
-        "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues",
+        "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues"
       );
     default:
       return error as Error;
@@ -60,8 +60,11 @@ export const parse = async (
   config: Config,
   setShowBilibiliCookieEditor: Setter<boolean>,
   setToast: AppContext[1]["setToast"],
-  setParsedResult: AppContext[3]["setParsedResult"],
+  setParsedResult: AppContext[3]["setParsedResult"]
 ) => {
+  // 解析前先清空原有的解析结果
+  setParsedResult(null);
+
   let result: ParsedResult | Error | null = null;
 
   try {
@@ -71,7 +74,7 @@ export const parse = async (
       } else {
         result = await platforms.bilibili.parser(
           input,
-          config.platform.bilibili.cookie,
+          config.platform.bilibili.cookie
         );
       }
     } else {
