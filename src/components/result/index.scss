@@ -4,7 +4,7 @@
   border-radius: 16px;
   padding: 5px 10px;
   width: 440px;
-  min-height: 440px;
+  height: 440px;
   color: #fff;
   box-shadow: var(--alley-box-shadow-secondary);
   margin-top: 20px;
@@ -24,10 +24,12 @@
 
   .parsed-links-wrapper {
     flex: 8;
+    overflow-y: hidden;
   }
 
   .parsed-links {
     flex: 8;
+    overflow-y: auto;
 
     .link {
       color: var(--alley-color-primary);
