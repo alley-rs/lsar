@@ -125,6 +125,7 @@ jobs:
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           releaseBody: ${{ needs.create-release.outputs.changelog }}
+          updaterJsonPreferNsis: true
           args: ${{ matrix.args }}
 
   publish-release:
