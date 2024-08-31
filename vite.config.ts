@@ -16,6 +16,8 @@ export default defineConfig(async ({ mode }) => ({
     },
   },
 
+  envPrefix: ["TAURI_ENV_PLATFORM"],
+
   esbuild: {
     drop: mode === "production" ? ["console"] : [],
   },
