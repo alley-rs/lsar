@@ -14,7 +14,10 @@ const About = () => {
 
   return (
     <LazySpace gap={8} class="about" justify="center">
-      <LazyTooltip text="反馈、提建议或意见，最好去 star 一下" placement="top">
+      <LazyTooltip
+        text="反馈、贡献、提建议或意见，最好去 star 一下"
+        placement="top"
+      >
         <LazyButton
           type="plain"
           shape="round"
