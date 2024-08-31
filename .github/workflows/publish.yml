@@ -124,6 +124,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
+          releaseBody: ${{ needs.create-release.outputs.changelog }}
           args: ${{ matrix.args }}
 
   publish-release:
