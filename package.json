@@ -1,6 +1,6 @@
 {
   "name": "lsar",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "",
   "type": "module",
   "scripts": {
@@ -16,11 +16,11 @@
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^2.0.0-rc.4",
-    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-rc.0",
-    "@tauri-apps/plugin-dialog": "2.0.0-rc.0",
-    "@tauri-apps/plugin-shell": "^2.0.0-rc.0",
-    "@tauri-apps/plugin-updater": "2.0.0-rc.0",
-    "alley-components": "^0.3.3",
+    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-rc.1",
+    "@tauri-apps/plugin-dialog": "2.0.0-rc.1",
+    "@tauri-apps/plugin-shell": "^2.0.0-rc.1",
+    "@tauri-apps/plugin-updater": "2.0.0-rc.1",
+    "alley-components": "^0.3.4",
     "buffer": "^6.0.3",
     "solid-icons": "^1.1.0",
     "solid-js": "^1.8.22"

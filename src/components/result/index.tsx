@@ -13,6 +13,7 @@ import {
   LazyLabel,
   LazyRow,
   LazySpace,
+  LazyText,
   LazyTooltip,
 } from "~/lazy";
 import "./index.scss";
@@ -101,7 +102,9 @@ const Result = (props: ParsedResult) => {
             {(link, index) => (
               <LazyRow>
                 <LazyCol span={21} align="center">
-                  <span class="link">{link}</span>
+                  <LazyText class="link" ellipsis={{ rows: 1 }}>
+                    {link}
+                  </LazyText>
                 </LazyCol>
 
                 <LazyCol span={3} align="center" justify="end">
