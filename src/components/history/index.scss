@@ -1,6 +1,9 @@
 #history {
   flex: 1.2;
   box-sizing: border-box;
+  overflow-y: auto;
+  height: 600px;
+  z-index: 2; /* 防止被底部关于栏覆盖 */
 
   .history-item {
     background-color: rgba(0, 0, 0, 0.08);
