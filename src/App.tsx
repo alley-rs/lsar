@@ -1,4 +1,4 @@
-import { createResource, createSignal, onMount, Show } from "solid-js";
+import { createResource, createSignal, lazy, onMount, Show } from "solid-js";
 import { LazyDialog, LazyFlex, LazyToast } from "./lazy";
 import { AppContext } from "./context";
 import { showMainWindow, getAllHistory, readConfigFile } from "./command";
@@ -9,6 +9,11 @@ import Result from "./components/result";
 import "./App.scss";
 import BiliCookieEditor from "./components/settings/bili-cookie";
 
+const TitleBar =
+  import.meta.env.TAURI_PLATFORM === "macos"
+    ? lazy(() => import("~/components/title-bar"))
+    : null;
+
 const App = () => {
   const [items, { refetch: refetchHistoryItems }] =
     createResource(getAllHistory);
@@ -16,7 +21,7 @@ const App = () => {
 
   const [toast, setToast] = createSignal<Toast | null>(null);
   const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
-    null
+    null,
   );
 
   const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
@@ -28,7 +33,7 @@ const App = () => {
 
   return (
     <>
-      <div data-tauri-drag-region class="titlebar" />
+      {TitleBar && <TitleBar />}
 
       <AppContext.Provider
         value={[
@@ -39,7 +44,11 @@ const App = () => {
           { showBilibiliCookieEditor, setShowBilibiliCookieEditor },
         ]}
       >
-        <LazyFlex>
+        <LazyFlex
+          class={
+            import.meta.env.TAURI_PLATFORM !== "macos" ? "not-macos" : undefined
+          }
+        >
           <History items={items()} />
 
           <LazyFlex id="right" direction="vertical">
