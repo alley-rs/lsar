@@ -1,4 +1,3 @@
-use tauri::Manager;
 use time::macros::{format_description, offset};
 use tracing::Level;
 use tracing_subscriber::fmt::time::OffsetTime;
@@ -76,6 +75,8 @@ fn setup_desktop_features(app: &mut tauri::App) -> Result<(), Box<dyn std::error
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 fn apply_window_effect(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    use tauri::Manager;
+
     let window = app.get_webview_window("main").unwrap();
 
     #[cfg(target_os = "macos")]
