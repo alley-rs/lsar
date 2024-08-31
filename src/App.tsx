@@ -11,7 +11,7 @@ import BiliCookieEditor from "./components/settings/bili-cookie";
 import About from "./components/about";
 
 const TitleBar =
-  import.meta.env.TAURI_PLATFORM === "macos"
+  import.meta.env.TAURI_ENV_PLATFORM === "darwin"
     ? lazy(() => import("~/components/title-bar"))
     : null;
 
