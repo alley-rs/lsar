@@ -29,16 +29,25 @@ pub struct Config {
 
 impl Config {
     pub fn play(&self, url: String) -> LsarResult<()> {
-        Command::new(&self.player.path)
+        debug!("Attempting to play URL: {}", url);
+        let result = Command::new(&self.player.path)
             .args(&self.player.args)
-            .arg(url)
-            .spawn()
-            .map_err(|e| {
-                error!(message = "创建播放器子进程失败", error = ?e);
-                e
-            })?;
+            .arg(&url)
+            .spawn();
 
-        Ok(())
+        match result {
+            Ok(child) => {
+                info!(
+                    "Successfully spawned player process with PID: {}",
+                    child.id()
+                );
+                Ok(())
+            }
+            Err(e) => {
+                error!("Failed to create player subprocess: {:?}", e);
+                Err(e.into())
+            }
+        }
     }
 }
 
@@ -48,45 +57,50 @@ static CONFIG_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| APP_CONFIG_DIR.joi
 pub async fn read_config_file() -> LsarResult<Config> {
     // 防止用户在启动程序后删除配置文件引发异常
     if !CONFIG_FILE_PATH.exists() {
+        debug!("Config file not found, creating default config");
         let default_config = Config::default();
         let config = toml::to_string(&default_config).map_err(|e| {
-            error!(message = "序列化配置失败", error = ?e);
+            error!("Failed to serialize default config: {:?}", e);
             e
         })?;
         fs::write(&*CONFIG_FILE_PATH, config).await.map_err(|e| {
-            error!(message = "写入配置文件失败", error = ?e);
+            error!("Failed to write default config file: {:?}", e);
             e
         })?;
-
+        info!("Created and wrote default config file");
         return Ok(default_config);
     }
 
+    debug!("Reading config file from: {:?}", *CONFIG_FILE_PATH);
     let data = fs::read_to_string(&*CONFIG_FILE_PATH).await.map_err(|e| {
-        error!(message = "读取配置文件失败", error = ?e);
+        error!("Failed to read config file: {:?}", e);
         e
     })?;
+
     let config: Config = toml::from_str(&data).map_err(|e| {
-        error!(message = "反序列化配置文件失败", error = ?e);
+        error!("Failed to deserialize config file: {:?}", e);
         e
     })?;
+
+    info!("Successfully read and parsed config file");
 
     Ok(config)
 }
 
 #[tauri::command]
 pub async fn write_config_file(config: Config) -> LsarResult<()> {
-    debug!(message = "写入新配置", config = ?config);
-
+    debug!("Writing new config: {:?}", config);
     let data = toml::to_string(&config).map_err(|e| {
-        error!(message = "序列化配置失败", error = ?e);
-        e
-    })?;
-    fs::write(&*CONFIG_FILE_PATH, data).await.map_err(|e| {
-        error!(message = "写入配置文件失败", error = ?e);
+        error!("Failed to serialize config: {:?}", e);
         e
     })?;
 
-    info!(message = "已写入新配置");
+    fs::write(&*CONFIG_FILE_PATH, data).await.map_err(|e| {
+        error!("Failed to write config file: {:?}", e);
+        e
+    })?;
+
+    info!("Successfully wrote new config to file");
 
     Ok(())
 }
