@@ -13,17 +13,17 @@ async fn get_global_pool() -> &'static SqlitePool {
             let db_path = APP_CONFIG_DIR.join("lsar.db");
             let uri = format!("{}?mode=rwc", db_path.display());
 
-            info!(message = "Database URI", uri = uri);
+            info!("Initializing database connection with URI: {}", uri);
 
             let pool = SqlitePoolOptions::new()
                 .max_connections(5)
                 .connect(&uri)
                 .await
                 .map_err(|e| {
-                    error!(message = "Failed to connect to the database", error = ?e);
+                    error!("Failed to connect to the database: {:?}", e);
                     e
                 })
-                .unwrap();
+                .expect("Database connection must be established");
 
             create_history_table(&pool).await.unwrap();
 
@@ -47,7 +47,7 @@ async fn create_history_table(pool: &SqlitePool) -> LsarResult<()> {
     .execute(pool)
     .await
     .map_err(|e| {
-        error!(message = "Failed to create history table", error = ?e);
+        error!("Failed to create history table: {:?}", e);
         e
     })?;
     info!("History table created or already exists");
@@ -56,7 +56,7 @@ async fn create_history_table(pool: &SqlitePool) -> LsarResult<()> {
         .execute(pool)
         .await
         .map_err(|e| {
-            error!(message = "Failed to create unique index", error = ?e);
+            error!("Failed to create unique index: {:?}", e);
             e
         })?;
     info!("History unique index created or already exists");
@@ -66,30 +66,37 @@ async fn create_history_table(pool: &SqlitePool) -> LsarResult<()> {
 
 #[tauri::command]
 pub async fn get_all_history() -> LsarResult<Vec<HistoryItem>> {
-    trace!(message = "获取全部历史记录");
+    debug!("Fetching all history records");
 
     let pool = get_global_pool().await;
 
     let rows: Vec<(i64, i64, i64, String, String, String, time::OffsetDateTime)> = sqlx::query_as(
-        "select id, platform, room_id, anchor, category, last_title, last_play_time
-from history
-order by last_play_time desc;",
+        "SELECT id, platform, room_id, anchor, category, last_title, last_play_time
+         FROM history
+         ORDER BY last_play_time DESC;",
     )
     .fetch_all(pool)
     .await
     .map_err(|e| {
-        error!(message = "获取全部历史记录失败", error = ?e);
+        error!("Failed to fetch all history records: {:?}", e);
         e
     })?;
 
+    info!("Successfully fetched {} history records", rows.len());
+
     Ok(rows
         .into_iter()
-        .map(|item| item.try_into().unwrap())
+        .map(|item| {
+            item.try_into()
+                .expect("Failed to convert database row to HistoryItem")
+        })
         .collect())
 }
 
 #[tauri::command]
 pub async fn delete_a_history_by_id(id: i64) -> LsarResult<()> {
+    debug!("Attempting to delete history record with id: {}", id);
+
     let pool = get_global_pool().await;
 
     let result = sqlx::query("DELETE FROM history WHERE id = ?")
@@ -97,14 +104,14 @@ pub async fn delete_a_history_by_id(id: i64) -> LsarResult<()> {
         .execute(pool)
         .await
         .map_err(|e| {
-            error!(message = "Failed to delete history record", error = ?e);
+            error!("Failed to delete history record: {:?}", e);
             e
         })?;
 
     if result.rows_affected() == 0 {
-        warn!(message = "No history record found with id", id = id);
+        warn!("No history record found with id: {}", id);
     } else {
-        info!(message = "Deleted history record with id", id = id);
+        info!("Successfully deleted history record with id: {}", id);
     }
 
     Ok(())
@@ -112,7 +119,11 @@ pub async fn delete_a_history_by_id(id: i64) -> LsarResult<()> {
 
 #[tauri::command]
 pub async fn insert_a_history(history: HistoryItem) -> LsarResult<()> {
-    trace!(message = "插入一条历史记录");
+    debug!(
+        "Inserting or updating history record for platform: {}, room_id: {}",
+        history.platform().to_str(),
+        history.room_id()
+    );
 
     let pool = get_global_pool().await;
 
@@ -135,21 +146,21 @@ pub async fn insert_a_history(history: HistoryItem) -> LsarResult<()> {
     .execute(pool)
     .await
     .map_err(|e| {
-        error!(message = "Failed to insert or update history record", error = ?e);
+        error!("Failed to insert or update history record: {:?}", e);
         e
     })?;
 
     if result.rows_affected() > 0 {
         info!(
-            message = "Inserted or updated history record for platform and room_id",
-            platform = history.platform().to_str(),
-            room_id = history.room_id()
+            "Successfully inserted or updated history record for platform: {}, room_id: {}",
+            history.platform().to_str(),
+            history.room_id()
         );
     } else {
         warn!(
-            message = "No changes made to history record for platform and room_id",
-            platform = history.platform().to_str(),
-            room_id = history.room_id()
+            "No changes made to history record for platform: {}, room_id: {}",
+            history.platform().to_str(),
+            history.room_id()
         );
     }
 
