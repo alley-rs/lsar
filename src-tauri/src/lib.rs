@@ -13,7 +13,8 @@ mod utils;
 #[macro_use]
 extern crate tracing;
 
-use error::LsarResult;
+use std::env;
+
 use tauri::{AppHandle, Manager};
 use time::macros::{format_description, offset};
 use tracing::Level;
@@ -21,8 +22,7 @@ use tracing_subscriber::fmt::time::OffsetTime;
 
 use crate::config::{read_config_file, write_config_file};
 use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
-#[cfg(all(desktop, not(debug_assertions)))]
-use crate::global::APP_CONFIG_DIR;
+use crate::error::LsarResult;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
 #[cfg(desktop)]
@@ -31,17 +31,21 @@ use crate::utils::md5;
 
 #[tauri::command]
 async fn play(url: String) -> LsarResult<()> {
+    info!("Attempting to play URL: {}", url);
     read_config_file().await?.play(url)
 }
 
 #[tauri::command]
 async fn open(url: String) -> LsarResult<()> {
+    info!("Opening external URL: {}", url);
     open::that(url).map_err(Into::into)
 }
 
 /// 防止启动时闪白屏
 #[tauri::command]
 async fn show_main_window(app: AppHandle) {
+    debug!("Showing main window");
+
     let main_window = app.get_webview_window("main").unwrap();
 
     main_window.show().unwrap();
@@ -60,6 +64,7 @@ pub fn run() {
     #[cfg(all(desktop, not(debug_assertions)))]
     // NOTE: _guard must be a top-level variable
     let (writer, _guard) = {
+        use crate::global::APP_CONFIG_DIR;
         let file_appender = tracing_appender::rolling::never(&*APP_CONFIG_DIR, "lsar.log");
         tracing_appender::non_blocking(file_appender)
     };
@@ -82,10 +87,16 @@ pub fn run() {
         builder.json().init();
     }
 
+    info!("Operating System: {}", env::consts::OS);
+    info!("OS Version: {}", os_info::get().version());
+    info!("Architecture: {}", env::consts::ARCH);
+
+    info!("Initializing application");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             if let Some(w) = app.get_webview_window("main") {
-                info!(message = "本程序已有窗口运行，自动聚焦到此窗口");
+                info!("Application instance already running, focusing existing window");
                 w.set_focus().unwrap();
             }
         }))
@@ -112,13 +123,21 @@ pub fn run() {
             write_config_file
         ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Error while running tauri application");
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    info!(
+        "Setting up application: version {}",
+        app.package_info().version
+    );
+
     #[cfg(desktop)]
-    app.handle()
-        .plugin(tauri_plugin_updater::Builder::new().build())?;
+    {
+        info!("Initializing update plugin");
+        app.handle()
+            .plugin(tauri_plugin_updater::Builder::new().build())?;
+    }
 
     #[cfg(any(target_os = "macos", target_os = "windows"))]
     {
@@ -126,6 +145,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
         #[cfg(target_os = "macos")]
         {
+            info!("Applying vibrancy effect on macOS");
             use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
             apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
                 .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
@@ -133,6 +153,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
         #[cfg(target_os = "windows")]
         {
+            info!("Applying acrylic effect on Windows");
             use window_vibrancy::apply_acrylic;
             apply_acrylic(&window, Some((18, 18, 18, 125)))
                 .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
@@ -141,6 +162,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(desktop)]
     {
+        info!("Spawning update check task");
         let handle = app.handle().clone();
         tauri::async_runtime::spawn(async move {
             if let Err(e) = update(handle).await {
@@ -148,6 +170,8 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             }
         });
     }
+
+    info!("Application setup completed");
 
     Ok(())
 }
