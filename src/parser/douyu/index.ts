@@ -23,13 +23,13 @@ interface Info {
   };
 }
 
-// interface MobileResponse {
-//   error: number;
-//   msg: string;
-//   data: {
-//     url: string;
-//   };
-// }
+interface MobileResponse {
+  error: number;
+  msg: string;
+  data: {
+    url: string;
+  };
+}
 
 const NOT_LIVING_STATE = "房间未开播";
 const INVALID_REQUEST = "非法请求";
@@ -143,9 +143,8 @@ class Douyu {
       }
     }
 
-    // FIXME: signFunc 为空很奇怪, 需要进一步修复
     if (!signFunc) {
-      return Error(`此房间未获取到 signFunc, 解析失败: ${this.roomID}`);
+      return Error(`此房间未获取到 signFunc, 可能未直播: ${this.roomID}`);
     }
 
     const v = signFunc.match(/\w{12}/)!;
@@ -260,13 +259,20 @@ class Douyu {
       }
     }
 
+    const links = [`${info!.data.rtmp_url}/${info!.data.rtmp_live}`];
+
+    const mr = await this.getMobileStream(params);
+    if (mr) {
+      links.push(mr);
+    }
+
     return {
       platform: "douyu",
       title: this.title,
       anchor: this.anchor,
       roomID: this.finalRoomID,
       category: this.category,
-      links: [`${info!.data.rtmp_url}/${info!.data.rtmp_live}`],
+      links,
     };
   }
 
@@ -277,28 +283,27 @@ class Douyu {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
     });
+
     return resp.body;
   }
 
-  //   private async getMobileStream(params: string): Promise<string | undefined> {
-  //     const url = "https://m.douyu.com/hgapi/livenc/room/getStreamUrl";
-  //     const resp = await post<object>(
-  //       url,
-  //       `${params}&rid=${String(this.finalRoomID)}&rate=-1`
-  //     );
-  //     if (!resp) {
-  //       return;
-  //     }
+  private async getMobileStream(params: string): Promise<string | undefined> {
+    const url = "https://m.douyu.com/hgapi/livenc/room/getStreamUrl";
+    const { body: mr } = await post<MobileResponse>(
+      url,
+      `${params}&rid=${String(this.finalRoomID)}&rate=-1`,
+    );
+    if (!mr) {
+      return;
+    }
 
-  //     const mr = resp as MobileResponse;
+    if (mr.error !== 0) {
+      error("获取手机播放流出错：", mr.msg);
+      return;
+    }
 
-  //     if (mr.error !== 0) {
-  //       error("获取手机播放流出错：", mr.msg);
-  //       return;
-  //     }
-
-  //     return mr.data.url;
-  //   }
+    return mr.data.url;
+  }
 }
 
 export default function douyu(input: string) {
