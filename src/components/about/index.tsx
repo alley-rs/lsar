@@ -17,6 +17,7 @@ const About = () => {
       <LazyTooltip
         text="反馈、贡献、提建议或意见，最好去 star 一下"
         placement="top"
+        delay={500}
       >
         <LazyButton
           type="plain"
@@ -28,7 +29,9 @@ const About = () => {
         </LazyButton>
       </LazyTooltip>
 
-      <LazyText type="secondary">{version()}</LazyText>
+      <LazyTooltip text="版本号" placement="top" delay={500}>
+        <LazyText type="secondary">{version()}</LazyText>
+      </LazyTooltip>
     </LazySpace>
   );
 };
