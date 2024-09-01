@@ -1,5 +1,5 @@
 import { debug, get, info } from "~/command";
-import { platforms } from "..";
+import { NOT_LIVE, platforms } from "..";
 
 interface CDNItem {
   host: string;
@@ -26,6 +26,7 @@ interface Response {
   code: number;
   message: string;
   data: {
+    live_status: 0 | 1; // 0 未播, 1 正在直播
     playurl_info: {
       playurl: {
         stream: StreamItem[];
@@ -167,7 +168,12 @@ class Bilibili {
 
     const { body } = await get<Response>(this.roomURL, { cookie: this.cookie });
     if (body.code !== 0) {
+      // code=0 仅代表请求成功, 不代表请求不合法, 也不代理直播状态
       return Error(body.message);
+    }
+
+    if (body.data.live_status === 0) {
+      return NOT_LIVE;
     }
 
     return body;
