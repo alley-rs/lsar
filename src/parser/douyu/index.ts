@@ -8,6 +8,7 @@ import {
   trace,
   warn,
 } from "~/command";
+import { NOT_LIVE } from "..";
 
 const log_prefix = "douyu";
 
@@ -232,7 +233,7 @@ class Douyu {
     if (info && info.error !== -15) {
       if (info.data.rtmp_live === undefined) {
         error(log_prefix, `${this.finalRoomID} 房间未开播`);
-        return Error(`${this.finalRoomID} 房间未开播`);
+        return NOT_LIVE;
       }
     } else {
       /*
@@ -246,7 +247,7 @@ class Douyu {
           log_prefix,
           "更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序",
         );
-        return null;
+        return Error("解析失败，请重试");
       }
 
       if (info instanceof Error) {
@@ -255,7 +256,7 @@ class Douyu {
 
       if (info.data.rtmp_live === undefined) {
         error(log_prefix, `${this.finalRoomID} 房间未开播`);
-        return Error(`${this.finalRoomID} 房间未开播`);
+        return NOT_LIVE;
       }
     }
 

@@ -1,4 +1,5 @@
 import { get } from "~/command";
+import { NOT_LIVE } from "..";
 
 type Resolution = "FULL_HD1" | "HD1" | "SD1" | "SD2";
 
@@ -118,7 +119,7 @@ export class Douyin {
     } = info;
 
     if (!data[0].stream_url) {
-      return Error("此房间未直播");
+      return NOT_LIVE;
     }
 
     const { flv_pull_url, hls_pull_url_map } = data[0].stream_url;
