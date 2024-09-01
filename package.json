@@ -17,7 +17,7 @@
   "dependencies": {
     "@tauri-apps/api": "^2.0.0-rc.4",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0-rc.1",
-    "@tauri-apps/plugin-dialog": "2.0.0-rc.1",
+    "@tauri-apps/plugin-dialog": "^2.0.0-rc.1",
     "@tauri-apps/plugin-shell": "^2.0.0-rc.1",
     "@tauri-apps/plugin-updater": "2.0.0-rc.1",
     "alley-components": "^0.3.4",
