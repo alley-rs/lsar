@@ -1,4 +1,5 @@
 import { computeMD5, debug, get, info, post } from "~/command";
+import { NOT_LIVE } from "..";
 
 interface CacheProfileOffData {
   liveStatus: "OFF";
@@ -125,7 +126,7 @@ class Huya {
     }
 
     if (liveStatus === "OFF") {
-      return Error("此房间未开播");
+      return NOT_LIVE;
     }
 
     const { baseSteamInfoList } = profile.data.stream;
