@@ -1,3 +1,4 @@
+import { error } from "~/command";
 import bilibili from "./bilibili";
 import douyin from "./douyin";
 import douyu from "./douyu";
@@ -36,8 +37,8 @@ export const platforms = {
 //   { value: "bilibili", label: "B 站" },
 // ];
 
-export const handleParsingError = (error: unknown): Error => {
-  const errorMessage = String(error);
+export const handleParsingError = (platform: Platform, e: unknown): Error => {
+  const errorMessage = String(e);
   switch (errorMessage) {
     case "http error: Connect":
       return new Error("网络连接异常");
@@ -47,10 +48,11 @@ export const handleParsingError = (error: unknown): Error => {
       return new Error("解码响应失败");
     case "http error: Other":
       return new Error(
-        "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues"
+        "其他网络错误，请将日志上传到 https://github.com/alley-rs/lsar/issues",
       );
     default:
-      return error as Error;
+      error(platform, errorMessage);
+      return e as Error;
   }
 };
 
@@ -60,7 +62,7 @@ export const parse = async (
   config: Config,
   setShowBilibiliCookieEditor: Setter<boolean>,
   setToast: AppContext[1]["setToast"],
-  setParsedResult: AppContext[3]["setParsedResult"]
+  setParsedResult: AppContext[3]["setParsedResult"],
 ) => {
   // 解析前先清空原有的解析结果
   setParsedResult(null);
@@ -74,14 +76,14 @@ export const parse = async (
       } else {
         result = await platforms.bilibili.parser(
           input,
-          config.platform.bilibili.cookie
+          config.platform.bilibili.cookie,
         );
       }
     } else {
       result = await platforms[platform!].parser(input);
     }
   } catch (e) {
-    result = handleParsingError(e);
+    result = handleParsingError(platform, e);
   }
 
   if (result instanceof Error) {
