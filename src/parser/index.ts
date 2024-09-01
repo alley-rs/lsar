@@ -4,6 +4,8 @@ import douyin from "./douyin";
 import douyu from "./douyu";
 import huya from "./huya";
 
+export const NOT_LIVE = Error("当前直播间未开播");
+
 export const platforms = {
   douyu: {
     label: "斗鱼",
