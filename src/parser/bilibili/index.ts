@@ -1,5 +1,6 @@
 import { debug, get, info } from "~/command";
 import { NOT_LIVE, platforms } from "..";
+import LiveStreamParser from "../base";
 
 interface CDNItem {
   host: string;
@@ -59,34 +60,29 @@ const BASE_URL =
   "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8&dolby=5&panorama=1&room_id=";
 const VERIFY_URL = "https://api.bilibili.com/x/web-interface/nav";
 
-class Bilibili {
+class BilibiliParser extends LiveStreamParser {
   private readonly pageURL: string = "";
   private readonly cookie: string;
-  private roomID: number;
-  private title = "";
-  private anchor = "";
-  private category = "";
 
   constructor(cookie: string, roomID = 0, url = "") {
+    super(roomID, BASE_URL);
     this.pageURL = url || platforms.bilibili.roomBaseURL + roomID;
     this.cookie = cookie;
-    this.roomID = roomID;
-  }
-
-  get roomURL(): string {
-    return BASE_URL + this.roomID.toString();
   }
 
   async parse(): Promise<ParsedResult | Error> {
     const username = await this.verifyCookie();
     info(LOG_PREFIX, `验证成功，登录的用户:${username}`);
 
+    const html = await this.fetchPageHTML();
+    const pageInfo = this.parsePageInfo(html);
+
     const roomInfo = await this.getRoomInfo();
     if (roomInfo instanceof Error) {
       return roomInfo;
     }
 
-    return this.parseRoomInfo(roomInfo);
+    return this.parseRoomInfo(pageInfo, roomInfo);
   }
 
   private async verifyCookie() {
@@ -102,9 +98,6 @@ class Bilibili {
   }
 
   private async getRoomInfo() {
-    const html = await this.fetchPageHTML();
-    this.parsePageInfo(html);
-
     const { body } = await get<Response>(this.roomURL, { cookie: this.cookie });
     if (body.code !== 0) {
       // code=0 仅代表请求成功, 不代表请求不合法, 也不代理直播状态
@@ -112,6 +105,22 @@ class Bilibili {
     }
 
     return body.data.live_status === 0 ? NOT_LIVE : body;
+  }
+
+  private parsePageInfo(html: string): {
+    title: string;
+    anchor: string;
+    category: string;
+  } {
+    if (!this.roomID) {
+      this.roomID = this.parseRoomID(html);
+    }
+
+    return {
+      title: this.parseTitle(html),
+      anchor: this.parseAnchorName(html),
+      category: this.parseCategory(html),
+    };
   }
 
   private async fetchPageHTML(): Promise<string> {
@@ -134,13 +143,41 @@ class Bilibili {
     return html;
   }
 
-  private parsePageInfo(html: string): void {
-    if (!this.roomID) {
-      this.roomID = this.parseRoomID(html);
-    }
-    this.title = this.parseTitle(html);
-    this.anchor = this.parseAnchorName(html);
-    this.category = this.parseCategory(html);
+  private parseRoomInfo(
+    pageInfo: {
+      title: string;
+      anchor: string;
+      category: string;
+    },
+    info: Response,
+  ): ParsedResult {
+    const links = this.parseLinks(info);
+    return {
+      ...pageInfo,
+      platform: "bilibili",
+      links,
+      roomID: this.roomID,
+    };
+  }
+
+  private parseLinks(info: Response): string[] {
+    const {
+      data: {
+        playurl_info: {
+          playurl: { stream },
+        },
+      },
+    } = info;
+
+    const links = stream.flatMap((s) =>
+      s.format.flatMap((fmt) =>
+        fmt.codec.flatMap((c) =>
+          c.url_info.map((cdn) => cdn.host + c.base_url + cdn.extra),
+        ),
+      ),
+    );
+
+    return links;
   }
 
   private parseRoomID(html: string) {
@@ -167,34 +204,14 @@ class Bilibili {
     if (!findResult) throw Error("未找到分类");
     return findResult[1];
   }
-
-  private parseRoomInfo(res: Response): ParsedResult {
-    const links = res.data.playurl_info.playurl.stream.flatMap((s) =>
-      s.format.flatMap((fmt) =>
-        fmt.codec.flatMap((c) =>
-          c.url_info.map((cdn) => cdn.host + c.base_url + cdn.extra),
-        ),
-      ),
-    );
-
-    return {
-      roomID: this.roomID,
-      title: this.title,
-      anchor: this.anchor,
-      category: this.category,
-      links,
-      platform: "bilibili",
-    };
-  }
 }
 
-export default function bilibili(
+export default function createBilibiliParser(
   input: string,
   cookie: string,
-): Promise<ParsedResult | Error> {
+): BilibiliParser {
   const roomID = Number.parseInt(input);
   // TODO: 正则验证链接合法性
   const url = Number.isNaN(roomID) ? input : undefined;
-  const instance = new Bilibili(cookie, roomID || 0, url);
-  return instance.parse();
+  return new BilibiliParser(cookie, roomID || 0, url);
 }

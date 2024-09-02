@@ -1,5 +1,6 @@
 import { computeMD5, debug, get, info, post } from "~/command";
 import { NOT_LIVE } from "..";
+import LiveStreamParser from "../base";
 
 interface CacheProfileOffData {
   liveStatus: "OFF";
@@ -52,20 +53,33 @@ const cdn = {
   WS: "网宿",
 } as const;
 
-const log_prefix = "huya";
+const LOG_REFIX = "huya";
 
-class Huya {
+class HuyaParser extends LiveStreamParser {
   roomID = 0;
   baseURL = "https://m.huya.com/";
   private pageURL = "";
+  private headers: Record<string, string>;
 
   constructor(roomID: number, url = "") {
+    super(roomID, "https://m.huya.com/");
     this.pageURL = url;
-    this.roomID = roomID;
+    this.headers = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    };
   }
 
-  get roomURL(): string {
-    return this.baseURL + this.roomID.toString();
+  async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
+    try {
+      const roomID = await this.getFinalRoomID();
+      if (roomID instanceof Error) return roomID;
+
+      const result = await this.getRoomProfile(roomID);
+      return result;
+    } catch (error) {
+      return error instanceof Error ? error : new Error(String(error));
+    }
   }
 
   private async getFinalRoomID() {
@@ -76,10 +90,7 @@ class Huya {
       url = this.pageURL;
     }
 
-    const { body: html } = await get<string>(url, {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-    });
+    const { body: html } = await get<string>(url, this.headers);
 
     const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
 
@@ -92,7 +103,7 @@ class Huya {
 
     const stream = JSON.parse(streamStr);
     const roomID = stream.data[0].gameLiveInfo.profileRoom as string;
-    info(log_prefix, `真实房间 id：${roomID}`);
+    info(LOG_REFIX, `真实房间 id：${roomID}`);
 
     return roomID;
   }
@@ -100,10 +111,7 @@ class Huya {
   private async getRoomProfile(roomID: string) {
     const { body: text } = await get<string>(
       `https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=${roomID}`,
-      {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-      },
+      this.headers,
     );
 
     const profile = JSON.parse(text) as CacheProfile;
@@ -112,14 +120,12 @@ class Huya {
       return Error(profile.message);
     }
 
-    console.log(profile);
-
     const {
       liveStatus,
       liveData: { nick, gameFullName, introduction },
     } = profile.data;
 
-    debug(log_prefix, `房间状态：${liveStatus}`);
+    debug(LOG_REFIX, `房间状态：${liveStatus}`);
 
     if (liveStatus === "REPLAY") {
       return Error("此间正在重播，本程序不解析重播视频源");
@@ -130,17 +136,25 @@ class Huya {
     }
 
     const { baseSteamInfoList } = profile.data.stream;
+    const uid = await this.getAnonymousUid();
 
     const parsedResult: ParsedResult = {
       platform: "huya",
-      links: [],
+      links: await this.getStreamLinks(baseSteamInfoList, uid),
       title: introduction,
       anchor: nick,
       roomID: Number(roomID),
       category: gameFullName,
     };
 
-    const uid = await this.getAnonymousUid();
+    return parsedResult;
+  }
+
+  private async getStreamLinks(
+    baseSteamInfoList: CacheProfileOnData["stream"]["baseSteamInfoList"],
+    uid: string,
+  ): Promise<string[]> {
+    const links: string[] = [];
     for (const item of baseSteamInfoList) {
       if (item.sFlvAntiCode && item.sFlvAntiCode.length > 0) {
         const anticode = await this.parseAnticode(
@@ -149,7 +163,7 @@ class Huya {
           item.sStreamName,
         );
         const url = `${item.sFlvUrl}/${item.sStreamName}.${item.sFlvUrlSuffix}?${anticode}`;
-        parsedResult.links.push(url);
+        links.push(url);
       }
       if (item.sHlsAntiCode && item.sHlsAntiCode.length > 0) {
         const anticode = await this.parseAnticode(
@@ -158,11 +172,10 @@ class Huya {
           item.sStreamName,
         );
         const url = `${item.sHlsUrl}/${item.sStreamName}.${item.sHlsUrlSuffix}?${anticode}`;
-        parsedResult.links.push(url);
+        links.push(url);
       }
     }
-
-    return parsedResult;
+    return links;
   }
 
   private async getAnonymousUid() {
@@ -232,31 +245,26 @@ class Huya {
 
     return queryString;
   }
+}
 
-  async parse() {
-    const roomID = await this.getFinalRoomID();
-    if (roomID instanceof Error) {
-      return roomID;
-    }
+function parseRoomID(input: string): number {
+  const trimmedInput = input.trim();
+  const parsedValue = Number.parseInt(trimmedInput);
 
-    const result = await this.getRoomProfile(roomID);
+  if (!Number.isNaN(parsedValue)) {
+    return parsedValue;
+  }
 
-    return result;
+  try {
+    const url = new URL(trimmedInput);
+    const basepath = url.pathname.slice(1);
+    return Number.parseInt(basepath);
+  } catch {
+    throw new Error("Invalid input: not a number or valid URL");
   }
 }
 
-export default function huya(input: string) {
-  let roomID = 0;
-  let url: string | undefined = undefined;
-
-  const rid = Number.parseInt(input);
-  if (Number.isNaN(rid)) {
-    // TODO: 正则验证链接合法性
-    url = input;
-  } else {
-    roomID = rid;
-  }
-
-  const d = new Huya(roomID, url);
-  return d.parse();
+export default function createHuyaParser(input: string): HuyaParser {
+  const roomID = parseRoomID(input);
+  return new HuyaParser(roomID);
 }

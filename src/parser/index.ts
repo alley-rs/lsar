@@ -3,6 +3,7 @@ import bilibili from "./bilibili";
 import douyin from "./douyin";
 import douyu from "./douyu";
 import huya from "./huya";
+import type LiveStreamParser from "./base";
 
 export const NOT_LIVE = Error("当前直播间未开播");
 
@@ -28,16 +29,6 @@ export const platforms = {
     parser: douyin,
   },
 } as const;
-//   {
-//     value: "douyu",
-//     label: "斗鱼",
-//     roomBaseURL: "https://www.douyu.com/",
-//     parser: Douyu,
-//   },
-//   { value: "huya", label: "虎牙" },
-//   { value: "douyin", label: "抖音" },
-//   { value: "bilibili", label: "B 站" },
-// ];
 
 export const handleParsingError = (platform: Platform, e: unknown): Error => {
   const errorMessage = String(e);
@@ -69,21 +60,22 @@ export const parse = async (
   // 解析前先清空原有的解析结果
   setParsedResult(null);
 
-  let result: ParsedResult | Error | null = null;
+  let parser: LiveStreamParser;
 
-  try {
-    if (platform === "bilibili") {
-      if (!config.platform.bilibili.cookie.length) {
-        setShowBilibiliCookieEditor(true);
-      } else {
-        result = await platforms.bilibili.parser(
-          input,
-          config.platform.bilibili.cookie,
-        );
-      }
-    } else {
-      result = await platforms[platform!].parser(input);
+  if (platform === "bilibili") {
+    if (!config.platform.bilibili.cookie.length) {
+      setShowBilibiliCookieEditor(true);
+      return;
     }
+
+    parser = platforms.bilibili.parser(input, config.platform.bilibili.cookie);
+  } else {
+    parser = platforms[platform!].parser(input);
+  }
+
+  let result: ParsedResult | Error | null;
+  try {
+    result = await parser.parse();
   } catch (e) {
     result = handleParsingError(platform, e);
   }
