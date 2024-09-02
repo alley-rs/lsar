@@ -60,6 +60,8 @@ const App = () => {
                 <Result {...parsedResult()!} />
               </Show>
             </LazyFlex>
+
+            <About />
           </LazyFlex>
 
           <Settings />
@@ -86,8 +88,6 @@ const App = () => {
         }}
         onClose={() => setToast(null)}
       />
-
-      <About />
     </>
   );
 };
