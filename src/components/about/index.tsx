@@ -46,7 +46,7 @@ const About = () => {
             type="plain"
             shape="round"
             size="small"
-            onClick={() => { }}
+            onClick={() => {}}
           >
             吾爱
           </LazyButton>
