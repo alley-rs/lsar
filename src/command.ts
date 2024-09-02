@@ -24,12 +24,12 @@ export const error = async (prefix: string, msg: string) =>
 
 export const get = async <T extends string | object>(
   url: string,
-  headers?: Record<string, string>
+  headers?: Record<string, string>,
 ) => invoke<HTTPResponse<T>>("get", { url, headers: headers ?? {} });
 export const post = async <T extends string | object>(
   url: string,
   body: string,
-  contentType: "json" | "form" = "form"
+  contentType: "json" | "form" = "form",
 ) => invoke<HTTPResponse<T>>("post", { url, body, contentType });
 
 export const readConfigFile = async () => invoke<Config>("read_config_file");
