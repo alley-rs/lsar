@@ -1,5 +1,6 @@
 import { get } from "~/command";
 import { NOT_LIVE } from "..";
+import LiveStreamParser from "../base";
 
 type Resolution = "FULL_HD1" | "HD1" | "SD1" | "SD2";
 
@@ -26,64 +27,61 @@ interface RoomInfo {
   };
 }
 
-export class Douyin {
-  baseURL = "https://live.douyin.com/";
-
-  headers: Record<string, string> = {
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Upgrade-Insecure-Requests": "1",
-  };
-  roomID: number;
+class DouyinParser extends LiveStreamParser {
+  private headers: Record<string, string>;
 
   constructor(roomID: number) {
-    this.roomID = roomID;
+    super(roomID, "https://live.douyin.com/");
+    this.headers = {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+      "Upgrade-Insecure-Requests": "1",
+    };
   }
 
-  get roomURL(): string {
-    return this.baseURL + this.roomID.toString();
-  }
-
-  private async getSetCookie() {
-    const resp = await get(this.roomURL, this.headers);
-    const respHeader = resp.headers as Record<string, string>;
-
-    const setCookie = respHeader["set-cookie"];
-    if (!setCookie) {
-      return Error("未获取到 cookie");
+  async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
+    try {
+      await this.setupHeaders();
+      const info = await this.getRoomInfo();
+      return this.parseRoomInfo(info);
+    } catch (error) {
+      return error instanceof Error ? error : new Error(String(error));
     }
-
-    return setCookie;
   }
 
-  private async getAcNonce() {
+  private async setupHeaders(): Promise<void> {
+    const acNonce = await this.getAcNonce();
+    const ttwid = await this.getTtwid();
+
+    this.headers = {
+      ...this.headers,
+      cookie: `__ac_nonce=${acNonce}; ttwid=${ttwid}`,
+      Accept: "*/*",
+      Host: "live.douyin.com",
+      Connection: "keep-alive",
+    };
+    delete this.headers["Upgrade-Insecure-Requests"];
+  }
+
+  private async getAcNonce(): Promise<string> {
     const cookie = await this.getSetCookie();
-    if (cookie instanceof Error) {
-      return cookie;
-    }
-
-    const acNonceRegex = /^__ac_nonce=(.*?);/;
-    const acNonce = acNonceRegex.exec(cookie);
-    if (!acNonce) {
-      return Error("cookie 中未获取到 __ac_nonce");
-    }
-
+    const acNonce = cookie.match(/^__ac_nonce=(.*?);/);
+    if (!acNonce) throw new Error("cookie 中未获取到 __ac_nonce");
     return acNonce[1];
   }
 
-  private async getTtwid() {
+  private async getTtwid(): Promise<string> {
     const cookie = await this.getSetCookie();
-    if (cookie instanceof Error) {
-      return cookie;
-    }
-
-    const ttwidRegex = /^ttwid=(.*?);/;
-    const ttwid = ttwidRegex.exec(cookie);
-    if (!ttwid) {
-      return Error("cookie 中未获取到 ttwid");
-    }
-
+    const ttwid = cookie.match(/^ttwid=(.*?);/);
+    if (!ttwid) throw new Error("cookie 中未获取到 ttwid");
     return ttwid[1];
+  }
+
+  private async getSetCookie(): Promise<string> {
+    const resp = await get(this.roomURL, this.headers);
+    const setCookie = (resp.headers as Record<string, string>)["set-cookie"];
+    if (!setCookie) throw new Error("未获取到 cookie");
+    return setCookie;
   }
 
   private async getRoomInfo(): Promise<RoomInfo> {
@@ -93,27 +91,7 @@ export class Douyin {
     return resp.body;
   }
 
-  async parse() {
-    const acNonce = await this.getAcNonce();
-    if (acNonce instanceof Error) {
-      return acNonce;
-    }
-
-    this.headers.cookie = `__ac_nonce=${acNonce}`;
-
-    const ttwid = await this.getTtwid();
-    if (ttwid instanceof Error) {
-      return ttwid;
-    }
-
-    this.headers.cookie = `ttwid=${ttwid}`;
-    this.headers.Accept = "*/*";
-    this.headers.Host = "live.douyin.com";
-    this.headers.Connection = "keep-alive";
-    delete this.headers["Upgrade-Insecure-Requests"];
-
-    const info = await this.getRoomInfo();
-
+  private parseRoomInfo(info: RoomInfo): ParsedResult | typeof NOT_LIVE {
     const {
       data: { user, data, partition_road_map },
     } = info;
@@ -124,7 +102,7 @@ export class Douyin {
 
     const { flv_pull_url, hls_pull_url_map } = data[0].stream_url;
 
-    const parsedResult: ParsedResult = {
+    return {
       platform: "douyin",
       anchor: user.nickname,
       title: data[0].title,
@@ -135,23 +113,27 @@ export class Douyin {
         partition_road_map.partition?.title ??
         "",
     };
-
-    return parsedResult;
   }
 }
 
-export default function douyin(input: string) {
-  let roomID: number;
-  const value = Number.parseInt(input.trim());
-  if (Number.isNaN(value)) {
-    const u = new URL(input);
-    const basepath = u.pathname.slice(1);
-    const rid = Number.parseInt(basepath);
-    roomID = rid;
-  } else {
-    roomID = value;
+export default function createDouyinParser(input: string): DouyinParser {
+  const roomID = parseRoomID(input);
+  return new DouyinParser(roomID);
+}
+
+function parseRoomID(input: string): number {
+  const trimmedInput = input.trim();
+  const parsedValue = Number.parseInt(trimmedInput);
+
+  if (!Number.isNaN(parsedValue)) {
+    return parsedValue;
   }
 
-  const p = new Douyin(roomID);
-  return p.parse();
+  try {
+    const url = new URL(trimmedInput);
+    const basepath = url.pathname.slice(1);
+    return Number.parseInt(basepath);
+  } catch {
+    throw new Error("Invalid input: not a number or valid URL");
+  }
 }
