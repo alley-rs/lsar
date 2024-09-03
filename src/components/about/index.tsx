@@ -1,5 +1,5 @@
 import { getVersion } from "@tauri-apps/api/app";
-import { createSignal, onMount } from "solid-js";
+import { createResource } from "solid-js";
 import { open } from "~/command";
 import {
   LazyButton,
@@ -13,12 +13,7 @@ import "./index.scss";
 const baseClass = "about";
 
 const About = () => {
-  const [version, setVersion] = createSignal<string | null>(null);
-
-  onMount(async () => {
-    const v = await getVersion();
-    setVersion(v);
-  });
+  const [version] = createResource(getVersion);
 
   return (
     <LazySpace class={baseClass} justify="around">
@@ -46,7 +41,7 @@ const About = () => {
             type="plain"
             shape="round"
             size="small"
-            onClick={() => {}}
+            onClick={() => { }}
           >
             吾爱
           </LazyButton>
