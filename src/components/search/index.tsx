@@ -47,7 +47,11 @@ const Search = () => {
 
         return (
           <LazyTag
-            color={currentPlatform() === key ? "#87d068" : "default"}
+            color={
+              currentPlatform() === key
+                ? "var(--alley-color-success)"
+                : "default"
+            }
             onClick={() => selectPlatform(key as Platform)}
           >
             {item.label}

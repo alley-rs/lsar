@@ -1,37 +1,61 @@
 import { getVersion } from "@tauri-apps/api/app";
-import { createSignal, onMount } from "solid-js";
+import { createResource } from "solid-js";
 import { open } from "~/command";
-import { LazyButton, LazySpace, LazyText, LazyTooltip } from "~/lazy";
+import {
+  LazyButton,
+  LazyLabel,
+  LazySpace,
+  LazyText,
+  LazyTooltip,
+} from "~/lazy";
 import "./index.scss";
 
-const About = () => {
-  const [version, setVersion] = createSignal<string | null>(null);
+const baseClass = "about";
 
-  onMount(async () => {
-    const v = await getVersion();
-    setVersion(v);
-  });
+const About = () => {
+  const [version] = createResource(getVersion);
 
   return (
-    <LazySpace gap={8} class="about" justify="center">
-      <LazyTooltip
-        text="反馈、贡献、提建议或意见，最好去 star 一下"
-        placement="top"
-        delay={500}
-      >
-        <LazyButton
-          type="plain"
-          shape="round"
-          size="small"
-          onClick={() => open("https://github.com/alley-rs/lsar")}
+    <LazySpace class={baseClass} justify="around">
+      <LazySpace>
+        <LazyLabel>反馈</LazyLabel>
+        <LazyTooltip
+          text="贡献、提建议或意见，最好去 star 一下"
+          placement="top"
+          delay={500}
         >
-          Github
-        </LazyButton>
-      </LazyTooltip>
+          <LazyButton
+            class={`${baseClass}-button`}
+            type="plain"
+            shape="round"
+            size="small"
+            onClick={() => open("https://github.com/alley-rs/lsar")}
+          >
+            Github
+          </LazyButton>
+        </LazyTooltip>
 
-      <LazyTooltip text="版本号" placement="top" delay={500}>
-        <LazyText type="secondary">{version()}</LazyText>
-      </LazyTooltip>
+        <LazyTooltip text="提建议或意见" placement="top" delay={500}>
+          <LazyButton
+            class={`${baseClass}-button`}
+            type="plain"
+            shape="round"
+            size="small"
+            onClick={() =>
+              open("https://www.52pojie.cn/thread-1959221-1-1.html")
+            }
+          >
+            吾爱
+          </LazyButton>
+        </LazyTooltip>
+      </LazySpace>
+
+      <LazySpace>
+        <LazyLabel>版本号</LazyLabel>
+        <LazyText class={`${baseClass}-version`} type="secondary">
+          {version()}
+        </LazyText>
+      </LazySpace>
     </LazySpace>
   );
 };

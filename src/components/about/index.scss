@@ -1,5 +1,15 @@
 .about {
   position: fixed;
   bottom: 4px;
-  width: 100vw;
+  width: 400px;
+
+  &-button {
+    &.alley-button {
+      color: var(--alley-color-text-description);
+    }
+  }
+
+  &-version {
+    padding-left: 12px;
+  }
 }
