@@ -51,15 +51,12 @@ class DouyinParser extends LiveStreamParser {
 
   private async setupHeaders(): Promise<void> {
     const acNonce = await this.getAcNonce();
+
+    this.headers.cookie = `__ac_nonce=${acNonce}`;
+
     const ttwid = await this.getTtwid();
 
-    this.headers = {
-      ...this.headers,
-      cookie: `__ac_nonce=${acNonce}; ttwid=${ttwid}`,
-      Accept: "*/*",
-      Host: "live.douyin.com",
-      Connection: "keep-alive",
-    };
+    this.headers.cookie += `; ttwid=${ttwid}`;
     delete this.headers["Upgrade-Insecure-Requests"];
   }
 
