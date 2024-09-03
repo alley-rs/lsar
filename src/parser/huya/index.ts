@@ -56,7 +56,6 @@ const cdn = {
 const LOG_REFIX = "huya";
 
 class HuyaParser extends LiveStreamParser {
-  roomID = 0;
   baseURL = "https://m.huya.com/";
   private pageURL = "";
   private headers: Record<string, string>;
@@ -247,7 +246,9 @@ class HuyaParser extends LiveStreamParser {
   }
 }
 
-function parseRoomID(input: string): number {
+function parseRoomID(input: string | number): number {
+  if (typeof input === "number") return input;
+
   const trimmedInput = input.trim();
   const parsedValue = Number.parseInt(trimmedInput);
 
@@ -264,7 +265,7 @@ function parseRoomID(input: string): number {
   }
 }
 
-export default function createHuyaParser(input: string): HuyaParser {
+export default function createHuyaParser(input: string | number): HuyaParser {
   const roomID = parseRoomID(input);
   return new HuyaParser(roomID);
 }

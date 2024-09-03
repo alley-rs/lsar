@@ -113,12 +113,16 @@ class DouyinParser extends LiveStreamParser {
   }
 }
 
-export default function createDouyinParser(input: string): DouyinParser {
+export default function createDouyinParser(
+  input: string | number,
+): DouyinParser {
   const roomID = parseRoomID(input);
   return new DouyinParser(roomID);
 }
 
-function parseRoomID(input: string): number {
+function parseRoomID(input: string | number): number {
+  if (typeof input === "number") return input;
+
   const trimmedInput = input.trim();
   const parsedValue = Number.parseInt(trimmedInput);
 

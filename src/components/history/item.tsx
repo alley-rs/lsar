@@ -39,7 +39,7 @@ const HistoryItem = (props: HistoryItemProps) => {
 
     await parse(
       props.platform,
-      props.room_id.toString(),
+      props.room_id,
       config()!,
       setShowBilibiliCookieEditor,
       setToast,

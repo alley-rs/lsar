@@ -51,7 +51,7 @@ export const handleParsingError = (platform: Platform, e: unknown): Error => {
 
 export const parse = async (
   platform: Platform,
-  input: string,
+  input: string | number,
   config: Config,
   setShowBilibiliCookieEditor: Setter<boolean>,
   setToast: AppContext[1]["setToast"],
