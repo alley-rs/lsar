@@ -45,7 +45,7 @@ class DouyuParser extends LiveStreamParser {
   private title = "";
   private category = "";
 
-  constructor(roomID: string) {
+  constructor(roomID: string | number) {
     super(parseRoomID(roomID), "https://www.douyu.com/");
   }
 
@@ -320,7 +320,9 @@ class DouyuParser extends LiveStreamParser {
   }
 }
 
-const parseRoomID = (input: string): number => {
+const parseRoomID = (input: string | number): number => {
+  if (typeof input === "number") return input;
+
   const trimmedInput = input.trim();
   const parsedValue = Number.parseInt(trimmedInput);
   if (!Number.isNaN(parsedValue)) {
@@ -336,6 +338,6 @@ const parseRoomID = (input: string): number => {
   }
 };
 
-export default function createDouyuParser(input: string) {
+export default function createDouyuParser(input: string | number) {
   return new DouyuParser(input);
 }
