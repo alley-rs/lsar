@@ -41,7 +41,9 @@ const About = () => {
             type="plain"
             shape="round"
             size="small"
-            onClick={() => { }}
+            onClick={() =>
+              open("https://www.52pojie.cn/thread-1959221-1-1.html")
+            }
           >
             吾爱
           </LazyButton>
