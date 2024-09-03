@@ -51,15 +51,12 @@ class DouyinParser extends LiveStreamParser {
 
   private async setupHeaders(): Promise<void> {
     const acNonce = await this.getAcNonce();
+
+    this.headers.cookie = `__ac_nonce=${acNonce}`;
+
     const ttwid = await this.getTtwid();
 
-    this.headers = {
-      ...this.headers,
-      cookie: `__ac_nonce=${acNonce}; ttwid=${ttwid}`,
-      Accept: "*/*",
-      Host: "live.douyin.com",
-      Connection: "keep-alive",
-    };
+    this.headers.cookie += `; ttwid=${ttwid}`;
     delete this.headers["Upgrade-Insecure-Requests"];
   }
 
@@ -116,12 +113,16 @@ class DouyinParser extends LiveStreamParser {
   }
 }
 
-export default function createDouyinParser(input: string): DouyinParser {
+export default function createDouyinParser(
+  input: string | number,
+): DouyinParser {
   const roomID = parseRoomID(input);
   return new DouyinParser(roomID);
 }
 
-function parseRoomID(input: string): number {
+function parseRoomID(input: string | number): number {
+  if (typeof input === "number") return input;
+
   const trimmedInput = input.trim();
   const parsedValue = Number.parseInt(trimmedInput);
 
