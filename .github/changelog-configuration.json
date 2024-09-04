@@ -2,39 +2,29 @@
   "categories": [
     {
       "title": "## 🎉 Features",
-      "labels": [
-        "feature"
-      ]
+      "labels": ["feature"]
     },
     {
       "title": "## 🚀 Enhancements",
-      "labels": [
-        "enhancement"
-      ]
+      "labels": ["enhancement"]
     },
     {
       "title": "## 🐛 Fixes",
-      "labels": [
-        "fix",
-        "bug"
-      ]
+      "labels": ["fix", "bug"]
     },
     {
       "title": "## 📦 Dependencies",
-      "labels": [
-        "dependencies"
-      ]
+      "labels": ["dependencies"]
+    },
+    {
+      "title": "## 🎨 Styles",
+      "labels": ["style"]
     },
     {
       "title": "## 🛠 Breaking Changes",
-      "labels": [
-        "semver-major",
-        "breaking-change"
-      ]
+      "labels": ["semver-major", "breaking-change"]
     }
   ],
   "pr_template": "- #{{TITLE}}(##{{NUMBER}})",
-  "base_branches": [
-    "main"
-  ]
+  "base_branches": ["main"]
 }
