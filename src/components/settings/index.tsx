@@ -1,5 +1,5 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import { createSignal, Show, useContext } from "solid-js";
+import { createEffect, createSignal, Show, useContext } from "solid-js";
 import { writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import {
@@ -11,10 +11,17 @@ import {
   LazyText,
 } from "~/lazy";
 
-const Settings = () => {
+interface SettingsProps {
+  show?: boolean;
+  onClose: () => void;
+}
+
+const Settings = (props: SettingsProps) => {
   const { config, refetchConfig } = useContext(AppContext)![2];
 
   const [path, setPath] = createSignal(config()?.player.path);
+
+  createEffect(() => setPath(config()?.player.path));
 
   const onSelectFile = async () => {
     const file = await open({
@@ -30,6 +37,8 @@ const Settings = () => {
     } else {
       // TODO: 关闭设置对话框
     }
+
+    props.onClose();
   };
 
   const onOk = async () => {
@@ -41,12 +50,13 @@ const Settings = () => {
 
     await writeConfigFile(c);
     refetchConfig();
+    props.onClose();
   };
 
   return (
     <LazyDialog
-      show={!config()?.player.path}
-      onClose={() => {}}
+      show={props.show || !config()?.player.path}
+      onClose={() => { }}
       maskClosable={false}
     >
       <LazyFlex direction="vertical" gap={8}>
@@ -59,7 +69,12 @@ const Settings = () => {
             </LazyText>
           </Show>
 
-          <LazyButton size="small" onClick={onSelectFile}>
+          <LazyButton
+            size="small"
+            onClick={onSelectFile}
+            shape="round"
+            type="primary"
+          >
             <Show when={!path()} fallback={"重新选择"}>
               选择文件
             </Show>

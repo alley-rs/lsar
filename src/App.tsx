@@ -1,5 +1,18 @@
-import { createResource, createSignal, lazy, onMount, Show } from "solid-js";
-import { LazyDialog, LazyFlex, LazyToast } from "./lazy";
+import {
+  children,
+  createResource,
+  createSignal,
+  lazy,
+  onMount,
+  Show,
+} from "solid-js";
+import {
+  LazyButton,
+  LazyDialog,
+  LazyFlex,
+  LazyToast,
+  LazyTooltip,
+} from "./lazy";
 import { AppContext } from "./context";
 import { showMainWindow, getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
@@ -9,6 +22,7 @@ import Result from "./components/result";
 import "./App.scss";
 import BiliCookieEditor from "./components/settings/bili-cookie";
 import About from "./components/about";
+import { AiFillSetting } from "solid-icons/ai";
 
 const TitleBar =
   import.meta.env.TAURI_ENV_PLATFORM === "darwin"
@@ -28,9 +42,13 @@ const App = () => {
   const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
     createSignal(false);
 
+  const [showSettings, setShowSettings] = createSignal(false);
+
   onMount(() => {
     showMainWindow();
   });
+
+  const onClickSettingsButton = () => setShowSettings(true);
 
   return (
     <>
@@ -64,7 +82,20 @@ const App = () => {
             <About />
           </LazyFlex>
 
-          <Settings />
+          <LazyTooltip text="设置" placement="top" delay={1000}>
+            <LazyButton
+              id="settings-button"
+              icon={<AiFillSetting />}
+              type="plain"
+              shape="circle"
+              onClick={onClickSettingsButton}
+            />
+          </LazyTooltip>
+
+          <Settings
+            show={showSettings()}
+            onClose={() => setShowSettings(false)}
+          />
 
           <LazyDialog
             class="bili-cookie-dialog"
