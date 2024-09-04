@@ -1,5 +1,5 @@
 import { createResource, createSignal, lazy, onMount, Show } from "solid-js";
-import { LazyDialog, LazyFlex, LazyToast } from "./lazy";
+import { LazyButton, LazyFlex, LazyToast, LazyTooltip } from "./lazy";
 import { AppContext } from "./context";
 import { showMainWindow, getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
@@ -7,8 +7,8 @@ import Search from "./components/search";
 import Settings from "./components/settings";
 import Result from "./components/result";
 import "./App.scss";
-import BiliCookieEditor from "./components/settings/bili-cookie";
 import About from "./components/about";
+import { AiFillSetting } from "solid-icons/ai";
 
 const TitleBar =
   import.meta.env.TAURI_ENV_PLATFORM === "darwin"
@@ -25,12 +25,13 @@ const App = () => {
     null,
   );
 
-  const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
-    createSignal(false);
+  const [showSettings, setShowSettings] = createSignal(false);
 
   onMount(() => {
     showMainWindow();
   });
+
+  const onClickSettingsButton = () => setShowSettings(true);
 
   return (
     <>
@@ -42,7 +43,10 @@ const App = () => {
           { toast, setToast },
           { config, refetchConfig },
           { parsedResult, setParsedResult },
-          { showBilibiliCookieEditor, setShowBilibiliCookieEditor },
+          {
+            showSettings,
+            setShowSettings,
+          },
         ]}
       >
         <LazyFlex
@@ -64,17 +68,17 @@ const App = () => {
             <About />
           </LazyFlex>
 
-          <Settings />
+          <LazyTooltip text="设置" placement="top" delay={1000}>
+            <LazyButton
+              id="settings-button"
+              icon={<AiFillSetting />}
+              type="plain"
+              shape="circle"
+              onClick={onClickSettingsButton}
+            />
+          </LazyTooltip>
 
-          <LazyDialog
-            class="bili-cookie-dialog"
-            title="输入 B 站 cookie"
-            show={showBilibiliCookieEditor()}
-            onClose={() => setShowBilibiliCookieEditor(false)}
-            maskClosable={false}
-          >
-            <BiliCookieEditor />
-          </LazyDialog>
+          <Settings />
         </LazyFlex>
       </AppContext.Provider>
 

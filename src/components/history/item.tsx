@@ -24,7 +24,7 @@ const HistoryItem = (props: HistoryItemProps) => {
     { setToast },
     { config },
     { setParsedResult },
-    { setShowBilibiliCookieEditor },
+    { setShowSettings: setShowBilibiliCookieEditor },
   ] = useAppContext();
 
   const [parsing, setParsing] = createSignal(false);
@@ -53,11 +53,11 @@ const HistoryItem = (props: HistoryItemProps) => {
     <LazyFlex class="history-item" direction="vertical">
       <Show when={props.category} fallback={<h4>{props.last_title}</h4>}>
         <LazyRow class="history-item-header">
-          <LazyCol span={18} align="center">
+          <LazyCol span={16} align="center">
             <h4>{props.last_title}</h4>
           </LazyCol>
 
-          <LazyCol span={6} justify="end" align="center">
+          <LazyCol span={8} justify="end" align="center">
             <LazyText class="history-item-category" type="secondary" italic>
               {props.category}
             </LazyText>

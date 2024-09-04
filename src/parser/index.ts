@@ -53,7 +53,7 @@ export const parse = async (
   platform: Platform,
   input: string | number,
   config: Config,
-  setShowBilibiliCookieEditor: Setter<boolean>,
+  setShowSettings: Setter<boolean>,
   setToast: AppContext[1]["setToast"],
   setParsedResult: AppContext[3]["setParsedResult"],
 ) => {
@@ -64,7 +64,7 @@ export const parse = async (
 
   if (platform === "bilibili") {
     if (!config.platform.bilibili.cookie.length) {
-      setShowBilibiliCookieEditor(true);
+      setShowSettings(true);
       return;
     }
 
