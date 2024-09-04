@@ -6,6 +6,7 @@ import huya from "./huya";
 import type LiveStreamParser from "./base";
 
 export const NOT_LIVE = Error("当前直播间未开播");
+export const IS_REPLAY = Error("当前直播间正在重播，本程序不解析重播源");
 
 export const platforms = {
   douyu: {
