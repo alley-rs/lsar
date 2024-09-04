@@ -97,11 +97,11 @@ pub enum PostContentType {
     Form,
 }
 
-impl Into<HeaderValue> for PostContentType {
-    fn into(self) -> HeaderValue {
-        match self {
-            Self::Json => HeaderValue::from_static("application/json"),
-            Self::Form => HeaderValue::from_static("application/x-www-form-urlencoded"),
+impl From<PostContentType> for HeaderValue {
+    fn from(val: PostContentType) -> Self {
+        match val {
+            PostContentType::Json => HeaderValue::from_static("application/json"),
+            PostContentType::Form => HeaderValue::from_static("application/x-www-form-urlencoded"),
         }
     }
 }
