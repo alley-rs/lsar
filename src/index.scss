@@ -1,6 +1,10 @@
 :root {
   --alley-color-bg: transparent;
-  --alley-color-mask: rgba(255, 255, 255, 0.5);
+  --alley-color-mask: radial-gradient(
+    closest-side,
+    rgb(255 255 255),
+    transparent
+  );
   --alley-color-info-bg: rgb(234 236 255 / 30%);
 }
 
@@ -9,6 +13,10 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
+}
+
+.alley-dialog-mask {
+  background: var(--alley-color-mask);
 }
 
 @media (prefers-color-scheme: dark) {
