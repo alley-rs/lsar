@@ -24,7 +24,7 @@ const HistoryItem = (props: HistoryItemProps) => {
     { setToast },
     { config },
     { setParsedResult },
-    { setShowBilibiliCookieEditor },
+    { setShowSettings: setShowBilibiliCookieEditor },
   ] = useAppContext();
 
   const [parsing, setParsing] = createSignal(false);

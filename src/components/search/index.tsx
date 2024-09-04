@@ -18,7 +18,7 @@ const Search = () => {
     { setToast },
     { config },
     { setParsedResult },
-    { setShowBilibiliCookieEditor },
+    { setShowSettings: setShowBilibiliCookieEditor },
   ] = useAppContext();
 
   const [input, setInput] = createSignal("");

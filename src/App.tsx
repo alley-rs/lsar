@@ -1,18 +1,5 @@
-import {
-  children,
-  createResource,
-  createSignal,
-  lazy,
-  onMount,
-  Show,
-} from "solid-js";
-import {
-  LazyButton,
-  LazyDialog,
-  LazyFlex,
-  LazyToast,
-  LazyTooltip,
-} from "./lazy";
+import { createResource, createSignal, lazy, onMount, Show } from "solid-js";
+import { LazyButton, LazyFlex, LazyToast, LazyTooltip } from "./lazy";
 import { AppContext } from "./context";
 import { showMainWindow, getAllHistory, readConfigFile } from "./command";
 import History from "./components/history";
@@ -20,7 +7,6 @@ import Search from "./components/search";
 import Settings from "./components/settings";
 import Result from "./components/result";
 import "./App.scss";
-import BiliCookieEditor from "./components/settings/bili-cookie";
 import About from "./components/about";
 import { AiFillSetting } from "solid-icons/ai";
 
@@ -38,9 +24,6 @@ const App = () => {
   const [parsedResult, setParsedResult] = createSignal<ParsedResult | null>(
     null,
   );
-
-  const [showBilibiliCookieEditor, setShowBilibiliCookieEditor] =
-    createSignal(false);
 
   const [showSettings, setShowSettings] = createSignal(false);
 
@@ -60,7 +43,10 @@ const App = () => {
           { toast, setToast },
           { config, refetchConfig },
           { parsedResult, setParsedResult },
-          { showBilibiliCookieEditor, setShowBilibiliCookieEditor },
+          {
+            showSettings,
+            setShowSettings,
+          },
         ]}
       >
         <LazyFlex
@@ -92,20 +78,7 @@ const App = () => {
             />
           </LazyTooltip>
 
-          <Settings
-            show={showSettings()}
-            onClose={() => setShowSettings(false)}
-          />
-
-          <LazyDialog
-            class="bili-cookie-dialog"
-            title="输入 B 站 cookie"
-            show={showBilibiliCookieEditor()}
-            onClose={() => setShowBilibiliCookieEditor(false)}
-            maskClosable={false}
-          >
-            <BiliCookieEditor />
-          </LazyDialog>
+          <Settings />
         </LazyFlex>
       </AppContext.Provider>
 
