@@ -10,6 +10,8 @@
 
 软件很简单，不需要太多说明，启动后即可明白如何使用。
 
+![主界面](docs/images/lsar.avif)
+
 ## 相关项目
 
 只列出主要的相关项目，涉及的其他功能性依赖请查看 [Cargo.toml](https://github.com/alley-rs/lsar/blob/main/src-tauri/Cargo.toml) 和 [package.json](https://github.com/alley-rs/lsar/blob/main/package.json)。
