@@ -8,7 +8,7 @@ import {
   trace,
   warn,
 } from "~/command";
-import { NOT_LIVE } from "..";
+import { IS_REPLAY, NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
 
 const LOG_PREFIX = "douyu";
@@ -36,7 +36,7 @@ interface MobileResponse {
 class DouyuParser extends LiveStreamParser {
   private isPost = true;
   private ub98484234Reg = new RegExp(
-    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/,
+    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}( {4}var .+?=\[.+?\];)?/,
   );
 
   private finalRoomID = 0;
@@ -50,6 +50,11 @@ class DouyuParser extends LiveStreamParser {
   }
 
   async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
+    const isReplay = await this.isReplay();
+    if (isReplay) {
+      return IS_REPLAY;
+    }
+
     try {
       const params = await this.getRequestParams();
       if (params instanceof Error) return params;
@@ -217,6 +222,13 @@ class DouyuParser extends LiveStreamParser {
       category: this.category,
       links,
     };
+  }
+
+  private async isReplay() {
+    const { body } = await get<{ room: { videoLoop: boolean } }>(
+      `https://www.douyu.com/betard/${this.roomID}`,
+    );
+    return body.room.videoLoop;
   }
 
   private parseAnchorName(html: string): string {
