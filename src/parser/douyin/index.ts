@@ -1,6 +1,7 @@
 import { get } from "~/command";
 import { NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
+import { parseRoomID } from "../utils";
 
 type Resolution = "FULL_HD1" | "HD1" | "SD1" | "SD2";
 
@@ -103,38 +104,22 @@ class DouyinParser extends LiveStreamParser {
       platform: "douyin",
       anchor: user.nickname,
       title: data[0].title,
-      links: [flv_pull_url.FULL_HD1, hls_pull_url_map.FULL_HD1], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识
+      links: [
+        flv_pull_url.FULL_HD1 ?? flv_pull_url.HD1,
+        hls_pull_url_map.FULL_HD1 ?? hls_pull_url_map.HD1,
+      ], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识
       roomID: this.roomID,
       category:
-        partition_road_map.sub_partition?.partition.title ??
-        partition_road_map.partition?.title ??
+        partition_road_map.sub_partition?.partition.title ||
+        partition_road_map.partition?.title ||
         "",
     };
   }
 }
 
-export default function createDouyinParser(
-  input: string | number,
-): DouyinParser {
+export default function createDouyinParser(input: string | number) {
   const roomID = parseRoomID(input);
+  if (roomID instanceof Error) return roomID;
+
   return new DouyinParser(roomID);
-}
-
-function parseRoomID(input: string | number): number {
-  if (typeof input === "number") return input;
-
-  const trimmedInput = input.trim();
-  const parsedValue = Number.parseInt(trimmedInput);
-
-  if (!Number.isNaN(parsedValue)) {
-    return parsedValue;
-  }
-
-  try {
-    const url = new URL(trimmedInput);
-    const basepath = url.pathname.slice(1);
-    return Number.parseInt(basepath);
-  } catch {
-    throw new Error("Invalid input: not a number or valid URL");
-  }
 }

@@ -8,8 +8,13 @@ import {
   trace,
   warn,
 } from "~/command";
-import { NOT_LIVE } from "..";
+import { IS_REPLAY, NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
+import {
+  INVALID_INPUT,
+  parseRoomID,
+  WRONG_SECOND_LEVEL_DOMAIN,
+} from "../utils";
 
 const LOG_PREFIX = "douyu";
 const DID = "10000000000000000000000000001501";
@@ -36,7 +41,7 @@ interface MobileResponse {
 class DouyuParser extends LiveStreamParser {
   private isPost = true;
   private ub98484234Reg = new RegExp(
-    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/,
+    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}( {4}var .+?=\[.+?\];)?/,
   );
 
   private finalRoomID = 0;
@@ -45,14 +50,19 @@ class DouyuParser extends LiveStreamParser {
   private title = "";
   private category = "";
 
-  constructor(roomID: string | number) {
-    super(parseRoomID(roomID), "https://www.douyu.com/");
+  constructor(roomID: number) {
+    super(roomID, "https://www.douyu.com/");
   }
 
   async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
     try {
       const params = await this.getRequestParams();
       if (params instanceof Error) return params;
+
+      const isReplay = await this.isReplay();
+      if (isReplay) {
+        return IS_REPLAY;
+      }
 
       const info = await this.getRoomInfo(params);
       return this.parseRoomInfo(info);
@@ -219,6 +229,14 @@ class DouyuParser extends LiveStreamParser {
     };
   }
 
+  private async isReplay() {
+    const { body } = await get<{
+      room: { videoLoop: boolean };
+    }>(`https://www.douyu.com/betard/${this.finalRoomID}`);
+
+    return body.room.videoLoop;
+  }
+
   private parseAnchorName(html: string): string {
     const anchor = html.match(/<div class="Title-anchorName" title="(.+?)">/);
     if (!anchor) {
@@ -320,24 +338,21 @@ class DouyuParser extends LiveStreamParser {
   }
 }
 
-const parseRoomID = (input: string | number): number => {
-  if (typeof input === "number") return input;
+export default function createDouyuParser(
+  input: string | number,
+): DouyuParser | Error {
+  let roomID = parseRoomID(input);
+  // 斗鱼的房间号可能在查询参数 rid 中
+  if (roomID instanceof Error) {
+    if (roomID === WRONG_SECOND_LEVEL_DOMAIN) return roomID;
 
-  const trimmedInput = input.trim();
-  const parsedValue = Number.parseInt(trimmedInput);
-  if (!Number.isNaN(parsedValue)) {
-    return parsedValue;
+    const url = new URL(input as string); // roomID 是 NaN，input 一定是字符串
+    const rid = url.searchParams.get("rid");
+    if (!rid) return roomID;
+
+    roomID = Number(rid);
+    if (Number.isNaN(roomID)) return INVALID_INPUT;
   }
 
-  try {
-    const url = new URL(trimmedInput);
-    const basepath = url.pathname.slice(1);
-    return Number.parseInt(basepath);
-  } catch {
-    throw new Error("Invalid input: not a number or valid URL");
-  }
-};
-
-export default function createDouyuParser(input: string | number) {
-  return new DouyuParser(input);
+  return new DouyuParser(roomID);
 }
