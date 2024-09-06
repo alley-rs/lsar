@@ -104,11 +104,14 @@ class DouyinParser extends LiveStreamParser {
       platform: "douyin",
       anchor: user.nickname,
       title: data[0].title,
-      links: [flv_pull_url.FULL_HD1, hls_pull_url_map.FULL_HD1], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识
+      links: [
+        flv_pull_url.FULL_HD1 ?? flv_pull_url.HD1,
+        hls_pull_url_map.FULL_HD1 ?? hls_pull_url_map.HD1,
+      ], // NOTE: FULL_HD1 日目前已知的最高清, 不确定 2K 和 4K 的标识
       roomID: this.roomID,
       category:
-        partition_road_map.sub_partition?.partition.title ??
-        partition_road_map.partition?.title ??
+        partition_road_map.sub_partition?.partition.title ||
+        partition_road_map.partition?.title ||
         "",
     };
   }
