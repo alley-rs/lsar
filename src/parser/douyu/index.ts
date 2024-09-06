@@ -339,9 +339,8 @@ class DouyuParser extends LiveStreamParser {
 
 export default function createDouyuParser(
   input: string | number,
-  secondLevelDomain: string,
 ): DouyuParser | Error {
-  let roomID = parseRoomID(input, secondLevelDomain);
+  let roomID = parseRoomID(input);
   // 斗鱼的房间号可能在查询参数 rid 中
   if (roomID instanceof Error) {
     if (roomID === WRONG_SECOND_LEVEL_DOMAIN) return roomID;

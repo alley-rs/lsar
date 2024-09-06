@@ -114,11 +114,8 @@ class DouyinParser extends LiveStreamParser {
   }
 }
 
-export default function createDouyinParser(
-  input: string | number,
-  secondLevelDomain: string,
-) {
-  const roomID = parseRoomID(input, secondLevelDomain);
+export default function createDouyinParser(input: string | number) {
+  const roomID = parseRoomID(input);
   if (roomID instanceof Error) return roomID;
 
   return new DouyinParser(roomID);

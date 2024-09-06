@@ -16,15 +16,8 @@ export const getSecondLevelDomain = (url: string) => {
   return domainParts[domainParts.length - 2];
 };
 
-export const parseRoomID = (
-  input: string | number,
-  secondLevelDomain: string,
-): number | Error => {
+export const parseRoomID = (input: string | number): number | Error => {
   if (typeof input === "number") return input;
-
-  if (getSecondLevelDomain(input) !== secondLevelDomain) {
-    return WRONG_SECOND_LEVEL_DOMAIN;
-  }
 
   try {
     const url = new URL(input);

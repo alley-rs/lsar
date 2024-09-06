@@ -66,7 +66,7 @@ const Settings = () => {
   return (
     <LazyDialog
       show={showSettings() || !defaultConfig()?.player.path}
-      onClose={() => { }}
+      onClose={() => {}}
       maskClosable={false}
     >
       <LazyFlex direction="vertical" gap={8} style={{ "min-width": "400px" }}>

@@ -4,7 +4,7 @@ import douyin from "./douyin";
 import douyu from "./douyu";
 import huya from "./huya";
 import type LiveStreamParser from "./base";
-import { getSecondLevelDomain } from "./utils";
+import { getSecondLevelDomain, WRONG_SECOND_LEVEL_DOMAIN } from "./utils";
 
 export const NOT_LIVE = Error("当前直播间未开播");
 export const IS_REPLAY = Error("当前直播间正在重播，本程序不解析重播源");
@@ -62,6 +62,15 @@ export const parse = async (
   // 解析前先清空原有的解析结果
   setParsedResult(null);
 
+  if (
+    typeof input === "string" &&
+    getSecondLevelDomain(platforms[platform].roomBaseURL) !==
+      getSecondLevelDomain(input)
+  ) {
+    setToast({ type: "error", message: WRONG_SECOND_LEVEL_DOMAIN.message });
+    return;
+  }
+
   let parser: LiveStreamParser | Error;
 
   if (platform === "bilibili") {
@@ -70,16 +79,9 @@ export const parse = async (
       return;
     }
 
-    parser = platforms.bilibili.parser(
-      input,
-      config.platform.bilibili.cookie,
-      getSecondLevelDomain(platforms.bilibili.roomBaseURL),
-    );
+    parser = platforms.bilibili.parser(input, config.platform.bilibili.cookie);
   } else {
-    parser = platforms[platform!].parser(
-      input,
-      getSecondLevelDomain(platforms[platform!].roomBaseURL),
-    );
+    parser = platforms[platform!].parser(input);
   }
 
   if (parser instanceof Error) {

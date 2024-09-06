@@ -249,9 +249,8 @@ class HuyaParser extends LiveStreamParser {
 
 export default function createHuyaParser(
   input: string | number,
-  secondLevelDomain: string,
 ): HuyaParser | Error {
-  const roomID = parseRoomID(input, secondLevelDomain);
+  const roomID = parseRoomID(input);
   if (roomID instanceof Error) return roomID;
 
   return new HuyaParser(roomID);
