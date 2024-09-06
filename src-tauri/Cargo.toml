@@ -20,21 +20,21 @@ tokio = { version = "1", features = ["macros"] }
 time = { version = "0", features = ['macros', 'serde'] }
 tracing = { version = "0", features = ["log", "release_max_level_info"] }
 tracing-subscriber = { version = "0", features = [
-    'time',
-    'env-filter',
-    'json',
+  'time',
+  'env-filter',
+  'json',
 ] }
 thiserror = "1"
 sqlx = { version = "0", default-features = false, features = [
-    "macros",
-    "runtime-tokio",
-    "sqlite",
-    "time",
+  "macros",
+  "runtime-tokio",
+  "sqlite",
+  "time",
 ] }
 dirs = "5"
 window-vibrancy = "0"
 md-5 = "0"
-reqwest = { version = "0", features = ["json"] }
+reqwest = { version = "0", features = ["json", "gzip"] }
 toml = "0"
 open = "5"
 os_info = "3"
