@@ -1,6 +1,7 @@
 import { debug, get, info } from "~/command";
 import { NOT_LIVE, platforms } from "..";
 import LiveStreamParser from "../base";
+import { getSecondLevelDomain, WRONG_SECOND_LEVEL_DOMAIN } from "../utils";
 
 interface CDNItem {
   host: string;
@@ -209,9 +210,17 @@ class BilibiliParser extends LiveStreamParser {
 export default function createBilibiliParser(
   input: string | number,
   cookie: string,
-): BilibiliParser {
-  const roomID = typeof input === "number" ? input : Number.parseInt(input);
-  // TODO: 正则验证链接合法性
-  const url = Number.isNaN(roomID) || !roomID ? (input as string) : undefined;
-  return new BilibiliParser(cookie, roomID || 0, url);
+  secondLevelDomain: string,
+) {
+  let roomID: number | undefined = undefined;
+  let url: string | undefined = undefined;
+
+  if (typeof input === "number") roomID = input;
+  else url = input;
+
+  if (url && getSecondLevelDomain(url) !== secondLevelDomain) {
+    return WRONG_SECOND_LEVEL_DOMAIN;
+  }
+
+  return new BilibiliParser(cookie, roomID, url);
 }

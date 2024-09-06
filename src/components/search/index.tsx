@@ -11,6 +11,7 @@ import {
   LazySpaceCompact,
   LazyTag,
 } from "~/lazy";
+import { isValidNumberOrHttpsUrl } from "~/parser/validators";
 
 const Search = () => {
   const [
@@ -21,7 +22,7 @@ const Search = () => {
     { setShowSettings: setShowBilibiliCookieEditor },
   ] = useAppContext();
 
-  const [input, setInput] = createSignal("");
+  const [input, setInput] = createSignal<string>("");
   const [currentPlatform, setCurrentPlatform] = createSignal<Platform | null>(
     null,
   );
@@ -38,6 +39,10 @@ const Search = () => {
 
     setCurrentPlatform(value);
     resetParseResult();
+  };
+
+  const onInput = (v: string) => {
+    setInput(v);
   };
 
   const buttons = children(() => (
@@ -62,11 +67,18 @@ const Search = () => {
   ));
 
   const onParse = async () => {
+    const value = input().trim();
+    const parsedInput = isValidNumberOrHttpsUrl(value);
+    if (parsedInput instanceof Error) {
+      setToast({ type: "error", message: parsedInput.message });
+      return;
+    }
+
     setLoading(true);
 
     await parse(
       currentPlatform()!,
-      input(),
+      parsedInput,
       config()!,
       setShowBilibiliCookieEditor,
       setToast,
@@ -83,13 +95,13 @@ const Search = () => {
           <LazyInput
             placeholder="输入房间号或直播间链接"
             value={input()}
-            onInput={(v) => setInput(v)}
+            onChange={onInput}
             disabled={loading()}
           />
           <LazyButton
             icon={<AiOutlineCheck />}
             isLoading={loading()}
-            disabled={!currentPlatform() || !input().length}
+            disabled={!currentPlatform() || !input()}
             onClick={onParse}
           />
         </LazySpaceCompact>

@@ -1,6 +1,7 @@
 import { get } from "~/command";
 import { NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
+import { parseRoomID } from "../utils";
 
 type Resolution = "FULL_HD1" | "HD1" | "SD1" | "SD2";
 
@@ -115,26 +116,10 @@ class DouyinParser extends LiveStreamParser {
 
 export default function createDouyinParser(
   input: string | number,
-): DouyinParser {
-  const roomID = parseRoomID(input);
+  secondLevelDomain: string,
+) {
+  const roomID = parseRoomID(input, secondLevelDomain);
+  if (roomID instanceof Error) return roomID;
+
   return new DouyinParser(roomID);
-}
-
-function parseRoomID(input: string | number): number {
-  if (typeof input === "number") return input;
-
-  const trimmedInput = input.trim();
-  const parsedValue = Number.parseInt(trimmedInput);
-
-  if (!Number.isNaN(parsedValue)) {
-    return parsedValue;
-  }
-
-  try {
-    const url = new URL(trimmedInput);
-    const basepath = url.pathname.slice(1);
-    return Number.parseInt(basepath);
-  } catch {
-    throw new Error("Invalid input: not a number or valid URL");
-  }
 }
