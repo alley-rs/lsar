@@ -55,14 +55,14 @@ class DouyuParser extends LiveStreamParser {
   }
 
   async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
-    const isReplay = await this.isReplay();
-    if (isReplay) {
-      return IS_REPLAY;
-    }
-
     try {
       const params = await this.getRequestParams();
       if (params instanceof Error) return params;
+
+      const isReplay = await this.isReplay();
+      if (isReplay) {
+        return IS_REPLAY;
+      }
 
       const info = await this.getRoomInfo(params);
       return this.parseRoomInfo(info);
@@ -230,9 +230,10 @@ class DouyuParser extends LiveStreamParser {
   }
 
   private async isReplay() {
-    const { body } = await get<{ room: { videoLoop: boolean } }>(
-      `https://www.douyu.com/betard/${this.roomID}`,
-    );
+    const { body } = await get<{
+      room: { videoLoop: boolean };
+    }>(`https://www.douyu.com/betard/${this.finalRoomID}`);
+
     return body.room.videoLoop;
   }
 
