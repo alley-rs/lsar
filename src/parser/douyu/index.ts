@@ -10,6 +10,11 @@ import {
 } from "~/command";
 import { IS_REPLAY, NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
+import {
+  INVALID_INPUT,
+  parseRoomID,
+  WRONG_SECOND_LEVEL_DOMAIN,
+} from "../utils";
 
 const LOG_PREFIX = "douyu";
 const DID = "10000000000000000000000000001501";
@@ -45,8 +50,8 @@ class DouyuParser extends LiveStreamParser {
   private title = "";
   private category = "";
 
-  constructor(roomID: string | number) {
-    super(parseRoomID(roomID), "https://www.douyu.com/");
+  constructor(roomID: number) {
+    super(roomID, "https://www.douyu.com/");
   }
 
   async parse(): Promise<ParsedResult | typeof NOT_LIVE | Error> {
@@ -332,24 +337,21 @@ class DouyuParser extends LiveStreamParser {
   }
 }
 
-const parseRoomID = (input: string | number): number => {
-  if (typeof input === "number") return input;
+export default function createDouyuParser(
+  input: string | number,
+): DouyuParser | Error {
+  let roomID = parseRoomID(input);
+  // 斗鱼的房间号可能在查询参数 rid 中
+  if (roomID instanceof Error) {
+    if (roomID === WRONG_SECOND_LEVEL_DOMAIN) return roomID;
 
-  const trimmedInput = input.trim();
-  const parsedValue = Number.parseInt(trimmedInput);
-  if (!Number.isNaN(parsedValue)) {
-    return parsedValue;
+    const url = new URL(input as string); // roomID 是 NaN，input 一定是字符串
+    const rid = url.searchParams.get("rid");
+    if (!rid) return roomID;
+
+    roomID = Number(rid);
+    if (Number.isNaN(roomID)) return INVALID_INPUT;
   }
 
-  try {
-    const url = new URL(trimmedInput);
-    const basepath = url.pathname.slice(1);
-    return Number.parseInt(basepath);
-  } catch {
-    throw new Error("Invalid input: not a number or valid URL");
-  }
-};
-
-export default function createDouyuParser(input: string | number) {
-  return new DouyuParser(input);
+  return new DouyuParser(roomID);
 }

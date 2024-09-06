@@ -1,6 +1,7 @@
 import { computeMD5, debug, get, info, post } from "~/command";
 import { NOT_LIVE } from "..";
 import LiveStreamParser from "../base";
+import { parseRoomID } from "../utils";
 
 interface CacheProfileOffData {
   liveStatus: "OFF";
@@ -246,26 +247,11 @@ class HuyaParser extends LiveStreamParser {
   }
 }
 
-function parseRoomID(input: string | number): number {
-  if (typeof input === "number") return input;
-
-  const trimmedInput = input.trim();
-  const parsedValue = Number.parseInt(trimmedInput);
-
-  if (!Number.isNaN(parsedValue)) {
-    return parsedValue;
-  }
-
-  try {
-    const url = new URL(trimmedInput);
-    const basepath = url.pathname.slice(1);
-    return Number.parseInt(basepath);
-  } catch {
-    throw new Error("Invalid input: not a number or valid URL");
-  }
-}
-
-export default function createHuyaParser(input: string | number): HuyaParser {
+export default function createHuyaParser(
+  input: string | number,
+): HuyaParser | Error {
   const roomID = parseRoomID(input);
+  if (roomID instanceof Error) return roomID;
+
   return new HuyaParser(roomID);
 }

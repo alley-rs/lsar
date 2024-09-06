@@ -209,9 +209,12 @@ class BilibiliParser extends LiveStreamParser {
 export default function createBilibiliParser(
   input: string | number,
   cookie: string,
-): BilibiliParser {
-  const roomID = typeof input === "number" ? input : Number.parseInt(input);
-  // TODO: 正则验证链接合法性
-  const url = Number.isNaN(roomID) || !roomID ? (input as string) : undefined;
-  return new BilibiliParser(cookie, roomID || 0, url);
+) {
+  let roomID: number | undefined = undefined;
+  let url: string | undefined = undefined;
+
+  if (typeof input === "number") roomID = input;
+  else url = input;
+
+  return new BilibiliParser(cookie, roomID, url);
 }
