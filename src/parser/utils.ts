@@ -2,10 +2,8 @@ export const INVALID_INPUT = Error("无法从链接中获取房间号");
 export const WRONG_SECOND_LEVEL_DOMAIN = Error("域名不匹配");
 
 export const getSecondLevelDomain = (url: string) => {
-  // 移除协议部分
   const domainPart = url.split("://")[1];
 
-  // 分割域名部分
   const domainParts = domainPart.split(".");
 
   // 如果域名部分少于两段，返回 null
