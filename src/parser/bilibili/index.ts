@@ -55,6 +55,21 @@ interface VerifySuccessResult {
 
 type VerifyResult = VerifyFailedResult | VerifySuccessResult;
 
+interface RoomInfo {
+  data: {
+    anchor_info: {
+      base_info: {
+        face: string; // 头像
+        uname: string;
+      };
+    };
+    room_info: {
+      area_name: string;
+      title: string;
+    };
+  };
+}
+
 const LOG_PREFIX = "bilibili";
 const BASE_URL =
   "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8&dolby=5&panorama=1&room_id=";
@@ -72,12 +87,16 @@ class BilibiliParser extends LiveStreamParser {
 
   async parse(): Promise<ParsedResult | Error> {
     const username = await this.verifyCookie();
+    if (username instanceof Error) {
+      return username;
+    }
+
     info(LOG_PREFIX, `验证成功，登录的用户:${username}`);
 
     const html = await this.fetchPageHTML();
-    const pageInfo = this.parsePageInfo(html);
+    const pageInfo = await this.parsePageInfo(html);
 
-    const roomInfo = await this.getRoomInfo();
+    const roomInfo = await this.getRoomPlayInfo();
     if (roomInfo instanceof Error) {
       return roomInfo;
     }
@@ -98,6 +117,25 @@ class BilibiliParser extends LiveStreamParser {
   }
 
   private async getRoomInfo() {
+    const { body } = await get<RoomInfo>(
+      `https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=${this.roomID}`,
+      { cookie: this.cookie },
+    );
+    const {
+      anchor_info: {
+        base_info: { uname },
+      },
+      room_info: { area_name, title },
+    } = body.data;
+
+    return {
+      title,
+      anchor: uname,
+      category: area_name,
+    };
+  }
+
+  private async getRoomPlayInfo() {
     const { body } = await get<Response>(this.roomURL, { cookie: this.cookie });
     if (body.code !== 0) {
       // code=0 仅代表请求成功, 不代表请求不合法, 也不代理直播状态
@@ -107,20 +145,13 @@ class BilibiliParser extends LiveStreamParser {
     return body.data.live_status === 0 ? NOT_LIVE : body;
   }
 
-  private parsePageInfo(html: string): {
-    title: string;
-    anchor: string;
-    category: string;
-  } {
+  private async parsePageInfo(html: string) {
     if (!this.roomID) {
       this.roomID = this.parseRoomID(html);
     }
 
-    return {
-      title: this.parseTitle(html),
-      anchor: this.parseAnchorName(html),
-      category: this.parseCategory(html),
-    };
+    const roomInfo = await this.getRoomInfo();
+    return roomInfo;
   }
 
   private async fetchPageHTML(): Promise<string> {
@@ -182,27 +213,11 @@ class BilibiliParser extends LiveStreamParser {
 
   private parseRoomID(html: string) {
     const findResult =
-      html.match(/"defaultRoomId":"(\d+)"/) || html.match(/"roomid":(\d+)/);
+      html.match(/"defaultRoomId":"(\d+)"/) ||
+      html.match(/"roomid":(\d+)/) ||
+      html.match(/"roomId":(\d+)/);
     if (!findResult) throw Error("未找到房间 id");
     return Number(findResult[1]);
-  }
-
-  private parseTitle(html: string) {
-    const findResult = html.match(/"title":"(.+?)"/);
-    if (!findResult) throw Error("未找到标题");
-    return findResult[1];
-  }
-
-  private parseAnchorName(html: string) {
-    const findResult = html.match(/\{"uname":"(.+?)"/);
-    if (!findResult) throw Error("未找到主播名");
-    return findResult[1];
-  }
-
-  private parseCategory(html: string) {
-    const findResult = html.match(/"area_name":"(.+?)"/);
-    if (!findResult) throw Error("未找到分类");
-    return findResult[1];
   }
 }
 
