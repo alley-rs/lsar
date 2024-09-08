@@ -1,7 +1,7 @@
 use super::constants::{INVALID_REQUEST, ROOM_OFFLINE_STATE};
-use super::http_client::HttpClient;
 use super::models::RoomInfo;
 use crate::error::{LsarResult, RequestError, RoomStateError};
+use crate::parser::http_client::HttpClient;
 
 pub struct RoomInfoFetcher {
     http_client: HttpClient,

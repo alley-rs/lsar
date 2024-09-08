@@ -1,5 +1,3 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-
 use regex::Regex;
 use tauri::AppHandle;
 use tauri::Emitter;
@@ -9,6 +7,7 @@ use crate::error::LsarResult;
 use crate::eval::EvalError;
 use crate::eval::EvalSender;
 use crate::eval::EVAL_EVENT;
+use crate::parser::time::now;
 use crate::utils::md5;
 
 pub struct SignatureGenerator {
@@ -53,7 +52,7 @@ impl SignatureGenerator {
     ) -> LsarResult<String> {
         trace!("Generating signature params");
 
-        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let timestamp = now()?.as_secs();
 
         let x = format!(
             "{}ub98484234({}, {}, {})",

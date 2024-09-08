@@ -1,8 +1,12 @@
 mod douyu;
+mod http_client;
+mod huya;
+mod time;
 
 use serde::Serialize;
 
 pub use self::douyu::parse_douyu;
+pub use self::huya::parse_huya;
 
 use crate::{error::LsarResult, platform::Platform};
 

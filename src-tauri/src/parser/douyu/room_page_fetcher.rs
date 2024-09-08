@@ -1,5 +1,4 @@
-use super::http_client::HttpClient;
-use crate::error::LsarResult;
+use crate::{error::LsarResult, parser::http_client::HttpClient};
 
 pub struct RoomPageFetcher {
     http_client: HttpClient,

@@ -34,6 +34,10 @@ pub(super) enum LsarError {
     UrlParse(#[from] url::ParseError),
     #[error(transparent)]
     Eval(#[from] EvalError),
+    #[error(transparent)]
+    SerdeJSON(#[from] serde_json::Error),
+    #[error("{0}")]
+    Other(String),
 }
 
 impl Serialize for LsarError {
@@ -130,5 +134,17 @@ pub(super) enum MissKeyFieldError {
 impl fmt::Display for MissKeyFieldError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
+    }
+}
+
+impl From<&str> for LsarError {
+    fn from(value: &str) -> Self {
+        LsarError::Other(value.to_owned())
+    }
+}
+
+impl From<String> for LsarError {
+    fn from(value: String) -> Self {
+        LsarError::Other(value)
     }
 }
