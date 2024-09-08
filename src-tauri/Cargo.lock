@@ -2426,6 +2426,7 @@ dependencies = [
  "md-5",
  "open",
  "os_info",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",
@@ -2443,6 +2444,7 @@ dependencies = [
  "toml 0.8.2",
  "tracing",
  "tracing-subscriber",
+ "url",
  "window-vibrancy",
 ]
 

@@ -38,6 +38,8 @@ reqwest = { version = "0", features = ["json", "gzip"] }
 toml = "0"
 open = "5"
 os_info = "3"
+regex = "1"
+url = "2"
 
 tauri-plugin-shell = "2.0.0-rc"
 tauri-plugin-clipboard-manager = "2.0.0-rc"
