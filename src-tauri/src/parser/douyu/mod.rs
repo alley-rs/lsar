@@ -54,9 +54,9 @@ impl DouyuParser {
     async fn is_replay(&self) -> LsarResult<bool> {
         let url = format!("https://www.douyu.com/betard/{}", self.final_room_id);
         let body: Value = self.http_client.get_json(&url).await?;
-        let is_replay = body["room"]["videoLoop"].as_bool().unwrap_or(false);
+        let is_replay = body["room"]["videoLoop"].as_i64().unwrap_or(0);
         info!("Room replay status: {}", is_replay);
-        Ok(is_replay)
+        Ok(is_replay == 1)
     }
 }
 
