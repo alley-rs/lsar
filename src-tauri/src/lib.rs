@@ -26,7 +26,7 @@ use crate::error::LsarResult;
 use crate::eval::eval_result;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
-use crate::parser::parse_douyu;
+use crate::parser::{parse_douyu, parse_huya};
 use crate::setup::{setup_app, setup_logging};
 use crate::utils::md5;
 
@@ -91,7 +91,8 @@ pub fn run() {
             read_config_file,
             write_config_file,
             eval_result,
-            parse_douyu
+            parse_douyu,
+            parse_huya
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

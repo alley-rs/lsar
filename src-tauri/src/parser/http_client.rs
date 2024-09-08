@@ -1,23 +1,32 @@
+use bytes::Bytes;
 use reqwest::Client;
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
+use tauri::http::{HeaderMap, HeaderName};
 
 use crate::error::{LsarError, LsarResult};
 
 #[derive(Clone)]
 pub struct HttpClient {
     client: Client,
+    headers: HeaderMap,
 }
 
 impl HttpClient {
     pub fn new() -> Self {
         HttpClient {
             client: Client::new(),
+            headers: HeaderMap::default(),
         }
+    }
+
+    pub fn insert_header(&mut self, name: HeaderName, value: &str) {
+        self.headers.insert(name, value.parse().unwrap());
     }
 
     pub async fn get(&self, url: &str) -> LsarResult<String> {
         self.client
             .get(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .map_err(|e| LsarError::Http(e.into()))?
@@ -26,9 +35,22 @@ impl HttpClient {
             .map_err(|e| LsarError::Http(e.into()))
     }
 
+    pub async fn get_bytes(&self, url: &str) -> LsarResult<Bytes> {
+        self.client
+            .get(url)
+            .headers(self.headers.clone())
+            .send()
+            .await
+            .map_err(|e| LsarError::Http(e.into()))?
+            .bytes()
+            .await
+            .map_err(|e| LsarError::Http(e.into()))
+    }
+
     pub async fn get_json<T: DeserializeOwned>(&self, url: &str) -> LsarResult<T> {
         self.client
             .get(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .map_err(|e| LsarError::Http(e.into()))?
@@ -37,12 +59,14 @@ impl HttpClient {
             .map_err(|e| LsarError::Http(e.into()))
     }
 
-    // NOTE: http client 之后给其他解析器用，这里的 post_json 方法一定会用到，暂时占位
-    #[allow(dead_code)]
-    pub async fn post_json<T: DeserializeOwned>(&self, url: &str, body: &str) -> LsarResult<T> {
+    pub async fn post_json<T: DeserializeOwned, S: Serialize>(
+        &self,
+        url: &str,
+        body: S,
+    ) -> LsarResult<T> {
         self.client
             .post(url)
-            .body(body.to_string())
+            .json(&body)
             .send()
             .await
             .map_err(|e| LsarError::Http(e.into()))?

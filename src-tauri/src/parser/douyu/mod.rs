@@ -6,19 +6,19 @@ use crate::eval::{EvalChannel, EvalSender};
 use crate::parser::{ParsedResult, Parser};
 
 mod constants;
-mod http_client;
 mod models;
 mod room_info_fetcher;
 mod room_page_fetcher;
 mod signature_generator;
 mod stream_info_parser;
 
-use http_client::HttpClient;
 use models::RoomInfo;
 use room_info_fetcher::RoomInfoFetcher;
 use room_page_fetcher::RoomPageFetcher;
 use signature_generator::SignatureGenerator;
 use stream_info_parser::StreamInfoParser;
+
+use super::http_client::HttpClient;
 
 pub struct DouyuParser {
     room_id: u64,
