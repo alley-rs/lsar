@@ -1,10 +1,12 @@
 mod config;
 mod db;
 mod error;
+mod eval;
 mod global;
 mod history;
 mod http;
 mod log;
+mod parser;
 mod platform;
 mod setup;
 #[cfg(desktop)]
@@ -21,8 +23,10 @@ use tauri::{AppHandle, Manager};
 use crate::config::{read_config_file, write_config_file};
 use crate::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 use crate::error::LsarResult;
+use crate::eval::eval_result;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
+use crate::parser::parse_douyu;
 use crate::setup::{setup_app, setup_logging};
 use crate::utils::md5;
 
@@ -85,7 +89,9 @@ pub fn run() {
             play,
             open,
             read_config_file,
-            write_config_file
+            write_config_file,
+            eval_result,
+            parse_douyu
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

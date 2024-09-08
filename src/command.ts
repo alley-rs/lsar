@@ -45,3 +45,6 @@ export const insertHistory = async (history: HistoryItem) =>
 
 export const deleteHistoryByID = async (id: number) =>
   invoke<void>("delete_a_history_by_id", { id });
+
+export const eval_result = async (result: string) =>
+  invoke<void>("eval_result", { result });
