@@ -118,7 +118,10 @@ pub(super) enum RequestError {
 
 impl fmt::Display for RequestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        let s = match self {
+            RequestError::BadRequest => "非法请求",
+        };
+        write!(f, "{}", s)
     }
 }
 

@@ -70,7 +70,9 @@ impl SignatureGenerator {
             .to_string();
 
         let md5_input = format!("{}{}{}{}", room_id, DEVICE_ID, timestamp, random_number);
+        debug!("md5 text:{}", md5_input);
         let md5_result = md5(md5_input).await;
+        debug!("md5: {}", md5_result);
 
         let modified_function = eval_result.replace(
             "CryptoJS.MD5(cb).toString()",
@@ -79,10 +81,13 @@ impl SignatureGenerator {
         let modified_function =
             modified_function[..modified_function.rfind(')').unwrap() + 1].to_string();
 
+        let timestamp = now()?.as_secs();
         let signature_call = format!(
             "{}({}, \"{}\", {})",
             modified_function, room_id, DEVICE_ID, timestamp
         );
+        trace!("signature call: {}", signature_call);
+
         let signature_params = self.wait_eval_result(&signature_call).await?;
 
         debug!("Signature params generated successfully");

@@ -78,6 +78,8 @@ impl Parser for DouyuParser {
             .generate_params(self.final_room_id, &signature_function)
             .await?;
 
+        debug!("Generated params: {}", params);
+
         let room_info: RoomInfo = self
             .room_info_fetcher
             .fetch(self.final_room_id, &params)
