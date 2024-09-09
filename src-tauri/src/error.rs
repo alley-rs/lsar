@@ -93,6 +93,12 @@ impl From<reqwest::Error> for HTTPError {
     }
 }
 
+impl From<reqwest::Error> for LsarError {
+    fn from(value: reqwest::Error) -> Self {
+        LsarError::Http(value.into())
+    }
+}
+
 #[derive(Debug, Serialize, thiserror::Error)]
 pub(super) enum RoomStateError {
     Offline,
