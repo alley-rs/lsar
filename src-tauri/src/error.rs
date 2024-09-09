@@ -2,6 +2,8 @@ use std::fmt;
 
 use serde::{Serialize, Serializer};
 
+use crate::eval::EvalError;
+
 pub(super) type LsarResult<T> = std::result::Result<T, LsarError>;
 
 #[derive(Debug, thiserror::Error)]
@@ -18,6 +20,26 @@ pub(super) enum LsarError {
     TomlDeserialize(#[from] toml::de::Error),
     #[error(transparent)]
     Update(#[from] tauri_plugin_updater::Error),
+    #[error(transparent)]
+    Regex(#[from] regex::Error),
+    #[error(transparent)]
+    SystemTime(#[from] std::time::SystemTimeError),
+    #[error(transparent)]
+    RoomState(#[from] RoomStateError),
+    #[error(transparent)]
+    Request(#[from] RequestError),
+    #[error(transparent)]
+    MissKeyField(#[from] MissKeyFieldError),
+    #[error(transparent)]
+    UrlParse(#[from] url::ParseError),
+    #[error(transparent)]
+    Eval(#[from] EvalError),
+    #[error(transparent)]
+    SerdeJSON(#[from] serde_json::Error),
+    #[error(transparent)]
+    ParseInt(#[from] std::num::ParseIntError),
+    #[error("{0}")]
+    Other(String),
 }
 
 impl Serialize for LsarError {
@@ -52,21 +74,88 @@ impl fmt::Display for HTTPError {
 impl From<reqwest::Error> for HTTPError {
     fn from(value: reqwest::Error) -> Self {
         if value.is_connect() {
-            return Self {
+            Self {
                 kind: HTTPErrorKind::Connect,
-            };
+            }
         } else if value.is_timeout() {
-            return Self {
+            Self {
                 kind: HTTPErrorKind::Timeout,
-            };
+            }
         } else if value.is_decode() {
-            return Self {
+            Self {
                 kind: HTTPErrorKind::Decode,
-            };
+            }
         } else {
-            return Self {
+            Self {
                 kind: HTTPErrorKind::Other,
-            };
+            }
         }
+    }
+}
+
+impl From<reqwest::Error> for LsarError {
+    fn from(value: reqwest::Error) -> Self {
+        LsarError::Http(value.into())
+    }
+}
+
+#[derive(Debug, Serialize, thiserror::Error)]
+pub(super) enum RoomStateError {
+    Offline,
+    NotExists,
+    IsClosed,
+    IsReplay,
+}
+
+impl fmt::Display for RoomStateError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let string = match self {
+            RoomStateError::Offline => "该房间未开播",
+            RoomStateError::NotExists => "房间号不存在",
+            RoomStateError::IsClosed => "该房间已被关闭",
+            RoomStateError::IsReplay => "该房间正在重播",
+        };
+        write!(f, "{}", string)
+    }
+}
+
+#[derive(Debug, Serialize, thiserror::Error)]
+pub(super) enum RequestError {
+    BadRequest,
+}
+
+impl fmt::Display for RequestError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            RequestError::BadRequest => "非法请求",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Debug, Serialize, thiserror::Error)]
+pub(super) enum MissKeyFieldError {
+    Title,
+    AnchorName,
+    SignatureFunction,
+    RandomNumber,
+    RoomId,
+}
+
+impl fmt::Display for MissKeyFieldError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl From<&str> for LsarError {
+    fn from(value: &str) -> Self {
+        LsarError::Other(value.to_owned())
+    }
+}
+
+impl From<String> for LsarError {
+    fn from(value: String) -> Self {
+        LsarError::Other(value)
     }
 }
