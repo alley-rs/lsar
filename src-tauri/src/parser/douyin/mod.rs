@@ -2,6 +2,7 @@ mod models;
 mod utils;
 
 use reqwest::header::{COOKIE, UPGRADE_INSECURE_REQUESTS};
+use serde_json::Value;
 
 use crate::error::{LsarResult, RoomStateError};
 use crate::parser::ParsedResult;
@@ -54,8 +55,28 @@ impl DouyinParser {
 
         trace!("Constructed room info URL: {}", url);
         info!("Sending GET request to fetch room info");
-        let room_info: RoomInfo = self.client.get_json(&url).await?;
-        debug!("Room info fetched successfully");
+        let room_info_value: Value = self.client.get_json(&url).await?;
+        debug!("Room info fetched successfully: {}", room_info_value);
+        let status_code = &room_info_value["status_code"].as_i64().unwrap_or(0);
+        if *status_code != 0 {
+            let prompts = &room_info_value["data"]["prompts"];
+            // status code 4001038
+            if let Value::String(s) = prompts {
+                if s == "该内容暂时无法无法查看" {
+                    return Err(RoomStateError::IsClosed.into());
+                }
+            }
+        }
+
+        let enter_room_id = &room_info_value["data"]["enter_room_id"];
+        if let Value::String(s) = enter_room_id {
+            if s.is_empty() {
+                return Err(RoomStateError::NotExists.into());
+            }
+        }
+
+        let room_info: RoomInfo = serde_json::from_value(room_info_value)?;
+        info!("Room info fetched successfully");
         Ok(room_info)
     }
 

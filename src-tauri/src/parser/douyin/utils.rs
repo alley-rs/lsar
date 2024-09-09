@@ -62,10 +62,3 @@ pub async fn get_ttwid(client: &HttpClient, url: &str) -> LsarResult<String> {
     debug!("ttwid extracted successfully");
     Ok(ttwid)
 }
-
-pub fn parse_room_id(input: &str) -> LsarResult<u64> {
-    debug!("Parsing room ID from input: {}", input);
-    let room_id = input.parse::<u64>()?;
-    debug!("Room ID parsed successfully: {}", room_id);
-    Ok(room_id)
-}
