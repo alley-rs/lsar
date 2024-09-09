@@ -54,7 +54,7 @@ impl HuyaParser {
         };
 
         debug!("Fetching HTML from URL: {}", url);
-        let html = self.client.get(&url).await.map_err(|e| {
+        let html = self.client.get_text(&url).await.map_err(|e| {
             error!("Failed to fetch HTML: {}", e);
             e
         })?;

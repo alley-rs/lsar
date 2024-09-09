@@ -1,5 +1,8 @@
 use bytes::Bytes;
-use reqwest::{header::CONTENT_TYPE, Client};
+use reqwest::{
+    header::{CONTENT_TYPE, USER_AGENT},
+    Client, Response,
+};
 use serde::{de::DeserializeOwned, Serialize};
 use tauri::http::{HeaderMap, HeaderName, HeaderValue};
 
@@ -14,9 +17,18 @@ pub struct HttpClient {
 impl HttpClient {
     pub fn new() -> Self {
         trace!("Creating new HttpClient instance");
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_AGENT,
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+                .parse()
+                .unwrap(),
+        );
+
         let client = HttpClient {
             client: Client::new(),
-            headers: HeaderMap::default(),
+            headers,
         };
         debug!("HttpClient instance created with default headers");
         client
@@ -33,7 +45,7 @@ impl HttpClient {
         Ok(())
     }
 
-    async fn send_request(
+    pub async fn send_request(
         &self,
         request: reqwest::RequestBuilder,
     ) -> LsarResult<reqwest::Response> {
@@ -47,11 +59,18 @@ impl HttpClient {
             })
     }
 
-    pub async fn get(&self, url: &str) -> LsarResult<String> {
+    pub async fn get(&self, url: &str) -> LsarResult<Response> {
         info!("Sending GET request to: {}", url);
         let response = self.send_request(self.client.get(url)).await?;
 
         debug!("GET request successful, status: {}", response.status());
+
+        Ok(response)
+    }
+
+    pub async fn get_text(&self, url: &str) -> LsarResult<String> {
+        let response = self.get(url).await?;
+
         let body = response.text().await.map_err(|e| {
             error!("Failed to read response body: {}", e);
             LsarError::Http(e.into())
@@ -62,8 +81,7 @@ impl HttpClient {
     }
 
     pub async fn get_bytes(&self, url: &str) -> LsarResult<Bytes> {
-        info!("Sending GET request for bytes to: {}", url);
-        let response = self.send_request(self.client.get(url)).await?;
+        let response = self.get(url).await?;
 
         debug!(
             "GET request for bytes successful, status: {}",

@@ -13,7 +13,7 @@ impl RoomPageFetcher {
         let url = format!("https://www.douyu.com/{}", room_id);
         debug!("Fetching room page from URL: {}", url);
 
-        let html = self.http_client.get(&url).await?;
+        let html = self.http_client.get_text(&url).await?;
 
         trace!("Room page fetched successfully");
         Ok(html)
