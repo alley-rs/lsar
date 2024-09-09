@@ -1,3 +1,4 @@
+mod bilibili;
 mod douyin;
 mod douyu;
 mod http_client;
@@ -6,6 +7,7 @@ mod time;
 
 use serde::Serialize;
 
+pub use self::bilibili::parse_bilibili;
 pub use self::douyin::parse_douyin;
 pub use self::douyu::parse_douyu;
 pub use self::huya::parse_huya;

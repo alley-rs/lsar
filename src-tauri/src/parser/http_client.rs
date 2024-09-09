@@ -10,7 +10,7 @@ use crate::error::{LsarError, LsarResult};
 
 #[derive(Clone)]
 pub struct HttpClient {
-    client: Client,
+    pub inner: Client,
     headers: HeaderMap,
 }
 
@@ -27,7 +27,7 @@ impl HttpClient {
         );
 
         let client = HttpClient {
-            client: Client::new(),
+            inner: Client::new(),
             headers,
         };
         debug!("HttpClient instance created with default headers");
@@ -61,7 +61,7 @@ impl HttpClient {
 
     pub async fn get(&self, url: &str) -> LsarResult<Response> {
         info!("Sending GET request to: {}", url);
-        let response = self.send_request(self.client.get(url)).await?;
+        let response = self.send_request(self.inner.get(url)).await?;
 
         debug!("GET request successful, status: {}", response.status());
 
@@ -98,7 +98,7 @@ impl HttpClient {
 
     pub async fn get_json<T: DeserializeOwned>(&self, url: &str) -> LsarResult<T> {
         info!("Sending GET request for JSON to: {}", url);
-        let response = self.send_request(self.client.get(url)).await?;
+        let response = self.send_request(self.inner.get(url)).await?;
 
         debug!(
             "GET request for JSON successful, status: {}",
@@ -117,7 +117,7 @@ impl HttpClient {
         info!("Sending POST request with body to: {}", url);
         let response = self
             .send_request(
-                self.client
+                self.inner
                     .post(url)
                     .body(body.to_string())
                     .header(CONTENT_TYPE, "application/x-www-form-urlencoded"),
@@ -140,7 +140,7 @@ impl HttpClient {
         body: &S,
     ) -> LsarResult<T> {
         info!("Sending POST request with JSON body to: {}", url);
-        let response = self.send_request(self.client.post(url).json(body)).await?;
+        let response = self.send_request(self.inner.post(url).json(body)).await?;
 
         debug!("POST request successful, status: {}", response.status());
         let json = response.json().await.map_err(|e| {
