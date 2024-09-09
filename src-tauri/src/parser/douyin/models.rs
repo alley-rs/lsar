@@ -56,8 +56,3 @@ pub enum Resolution {
     Sd1,
     Sd2,
 }
-
-pub enum LiveStatus {
-    Live = 1,
-    Offline = 2,
-}
