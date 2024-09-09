@@ -36,6 +36,8 @@ pub(super) enum LsarError {
     Eval(#[from] EvalError),
     #[error(transparent)]
     SerdeJSON(#[from] serde_json::Error),
+    #[error(transparent)]
+    ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]
     Other(String),
 }
