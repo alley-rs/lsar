@@ -16,6 +16,9 @@ import { parse, platforms } from "~/parser";
 
 interface HistoryItemProps extends HistoryItem {
   onDelete: () => void;
+  disableParseButton?: boolean;
+  startParsing: () => void;
+  endParsing: () => void;
 }
 
 const HistoryItem = (props: HistoryItemProps) => {
@@ -35,6 +38,7 @@ const HistoryItem = (props: HistoryItemProps) => {
   };
 
   const onParse = async () => {
+    props.startParsing();
     setParsing(true);
 
     await parse(
@@ -47,6 +51,7 @@ const HistoryItem = (props: HistoryItemProps) => {
     );
 
     setParsing(false);
+    props.endParsing();
   };
 
   return (
@@ -80,7 +85,12 @@ const HistoryItem = (props: HistoryItemProps) => {
 
         <LazyCol span={6} align="center">
           <LazySpace>
-            <LazyTooltip text="解析本直播间" placement="bottom" delay={1000}>
+            <LazyTooltip
+              text="解析本直播间"
+              placement="bottom"
+              delay={1000}
+              disabled={props.disableParseButton}
+            >
               <LazyButton
                 isLoading={parsing()}
                 icon={<AiFillApi />}
@@ -88,6 +98,7 @@ const HistoryItem = (props: HistoryItemProps) => {
                 shape="circle"
                 size="small"
                 onClick={onParse}
+                disabled={props.disableParseButton}
               />
             </LazyTooltip>
 

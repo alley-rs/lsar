@@ -40,7 +40,10 @@ open = "5"
 os_info = { version = "3", default-features = false }
 regex = { version = "1", default-features = false }
 url = "2"
-rand = { version = "0", default-features = false, features = ["std"] }
+rand = { version = "0", default-features = false, features = [
+  "std",
+  "std_rng",
+] }
 base64 = "0"
 bytes = "1"
 
