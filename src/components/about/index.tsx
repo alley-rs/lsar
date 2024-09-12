@@ -1,13 +1,7 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { createResource } from "solid-js";
 import { open } from "~/command";
-import {
-  LazyButton,
-  LazyLabel,
-  LazySpace,
-  LazyText,
-  LazyTooltip,
-} from "~/lazy";
+import { LazyButton, LazyLabel, LazySpace, LazyTooltip } from "~/lazy";
 import "./index.scss";
 
 const baseClass = "about";
@@ -52,9 +46,23 @@ const About = () => {
 
       <LazySpace>
         <LazyLabel>版本号</LazyLabel>
-        <LazyText class={`${baseClass}-version`} type="secondary">
-          {version()}
-        </LazyText>
+        <LazyTooltip
+          text="若有新版本，启动本程序时会自动更新，或者点击版本号打开最新版下载页面"
+          placement="top"
+          delay={1000}
+        >
+          <LazyButton
+            class={`${baseClass}-button`}
+            type="plain"
+            shape="round"
+            size="small"
+            onClick={() =>
+              open("https://github.com/alley-rs/lsar/releases/latest")
+            }
+          >
+            {version()}
+          </LazyButton>
+        </LazyTooltip>
       </LazySpace>
     </LazySpace>
   );
