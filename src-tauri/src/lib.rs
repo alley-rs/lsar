@@ -7,6 +7,7 @@ mod history;
 mod http;
 mod log;
 mod parser;
+mod path;
 mod platform;
 mod setup;
 #[cfg(desktop)]
@@ -27,6 +28,7 @@ use crate::eval::eval_result;
 use crate::http::{get, post};
 use crate::log::{debug, error, info, trace, warn};
 use crate::parser::{parse_bilibili, parse_douyin, parse_douyu, parse_huya};
+use crate::path::get_player_paths;
 use crate::setup::{setup_app, setup_logging};
 use crate::utils::md5;
 
@@ -95,6 +97,7 @@ pub fn run() {
             parse_huya,
             parse_douyin,
             parse_bilibili,
+            get_player_paths
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
