@@ -37,6 +37,8 @@ pub(super) enum LsarError {
     #[error(transparent)]
     SerdeJSON(#[from] serde_json::Error),
     #[error(transparent)]
+    VarError(#[from] std::env::VarError),
+    #[error(transparent)]
     ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]
     Other(String),
