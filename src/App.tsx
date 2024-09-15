@@ -83,7 +83,6 @@ const App = () => {
       </AppContext.Provider>
 
       <LazyToast
-        class="message"
         open={!!toast()}
         placement="bottom"
         alert={{

@@ -4,7 +4,11 @@ use crate::error::LsarResult;
 
 #[tauri::command]
 pub fn get_player_paths() -> LsarResult<Vec<PathBuf>> {
-    let commands = ["mpv"];
+    let commands = if cfg!(target_os = "windows") {
+        ["mpv.exe"]
+    } else {
+        ["mpv"]
+    };
     debug!("Searching for player commands: {:?}", commands);
 
     let mut player_paths = Vec::new();
@@ -14,9 +18,13 @@ pub fn get_player_paths() -> LsarResult<Vec<PathBuf>> {
         e
     })?;
 
-    debug!("PATH environment variable found");
+    debug!("PATH environment variable found: {}", paths);
 
-    for path_entry in paths.split(':') {
+    for path_entry in paths.split(if cfg!(target_os = "windows") {
+        ';'
+    } else {
+        ':'
+    }) {
         debug!("Searching in PATH entry: {}", path_entry);
         for cmd in &commands {
             let path = PathBuf::from(path_entry).join(cmd);
