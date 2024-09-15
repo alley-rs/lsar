@@ -1,6 +1,12 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import { createEffect, createSignal, Show, useContext } from "solid-js";
-import { writeConfigFile } from "~/command";
+import {
+  createEffect,
+  createSignal,
+  onMount,
+  Show,
+  useContext,
+} from "solid-js";
+import { getPlayerPaths, writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import {
   LazyButton,
@@ -15,7 +21,7 @@ import {
 const Settings = () => {
   const [
     _,
-    __,
+    { setToast },
     { config: defaultConfig, refetchConfig },
     ___,
     { showSettings, setShowSettings },
@@ -24,6 +30,27 @@ const Settings = () => {
   const [lsarConfig, setLsarConfig] = createSignal(defaultConfig());
 
   createEffect(() => setLsarConfig(defaultConfig()));
+
+  onMount(async () => {
+    if (defaultConfig()?.player.path) return;
+
+    const paths = await getPlayerPaths();
+    if (!paths.length) return;
+
+    setLsarConfig(
+      (prev) =>
+        prev && {
+          ...prev,
+          player: { path: paths[0], args: [] },
+        },
+    );
+
+    setToast({
+      type: "success",
+      message:
+        "已自动选择播放器，如果此播放器不是你想使用的播放器，请点击“重新选择”按钮自行选择",
+    });
+  });
 
   const close = () => setShowSettings(false);
 
@@ -66,7 +93,7 @@ const Settings = () => {
   return (
     <LazyDialog
       show={showSettings() || !defaultConfig()?.player.path}
-      onClose={() => {}}
+      onClose={() => { }}
       maskClosable={false}
     >
       <LazyFlex direction="vertical" gap={8} style={{ "min-width": "400px" }}>
