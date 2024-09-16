@@ -73,11 +73,11 @@ const HistoryItem = (props: HistoryItemProps) => {
       <LazyDivider />
 
       <LazyRow>
-        <LazyCol span={14} align="center">
+        <LazyCol span={15} align="center">
           <LazyText>{props.anchor}</LazyText>
         </LazyCol>
 
-        <LazyCol span={4} align="center">
+        <LazyCol span={3} align="center">
           <LazyText type="secondary">
             {platforms[props.platform].label}
           </LazyText>
