@@ -1,6 +1,6 @@
 {
   "name": "lsar",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "",
   "type": "module",
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@tauri-apps/api": "^2.0.0-rc.4",
-    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-rc.1",
+    "@tauri-apps/api": "^2.0.0-rc.5",
+    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-rc.2",
     "@tauri-apps/plugin-dialog": "^2.0.0-rc.1",
     "@tauri-apps/plugin-shell": "^2.0.0-rc.1",
     "@tauri-apps/plugin-updater": "2.0.0-rc.1",
@@ -26,13 +26,13 @@
     "solid-js": "^1.8.22"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@tauri-apps/cli": "^2.0.0-rc.13",
-    "@types/node": "^22.5.4",
+    "@biomejs/biome": "^1.9.2",
+    "@tauri-apps/cli": "^2.0.0-rc.16",
+    "@types/node": "^22.5.5",
     "cross-env": "^7.0.3",
-    "sass": "^1.78.0",
+    "sass": "^1.79.3",
     "typescript": "^5.6.2",
-    "vite": "^5.4.4",
+    "vite": "^5.4.7",
     "vite-plugin-solid": "^2.10.2"
   }
 }
