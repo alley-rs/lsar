@@ -51,8 +51,8 @@ pub fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>>
         app.package_info().version
     );
 
-    #[cfg(desktop)]
-    setup_desktop_features(app)?;
+    #[cfg(all(desktop, not(debug_assertions)))]
+    setup_updater(app)?;
 
     #[cfg(any(target_os = "macos", target_os = "windows"))]
     apply_window_effect(app)?;
@@ -68,8 +68,8 @@ pub fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>>
     Ok(())
 }
 
-#[cfg(desktop)]
-fn setup_desktop_features(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+#[cfg(all(desktop, not(debug_assertions)))]
+fn setup_updater(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     info!("Initializing update plugin");
     app.handle()
         .plugin(tauri_plugin_updater::Builder::new().build())?;

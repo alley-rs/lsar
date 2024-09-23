@@ -10,7 +10,7 @@ mod parser;
 mod path;
 mod platform;
 mod setup;
-#[cfg(desktop)]
+#[cfg(all(desktop, not(debug_assertions)))]
 mod update;
 mod utils;
 
