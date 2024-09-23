@@ -1,11 +1,5 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import {
-  createEffect,
-  createSignal,
-  onMount,
-  Show,
-  useContext,
-} from "solid-js";
+import { createEffect, createSignal, Show, useContext } from "solid-js";
 import { getPlayerPaths, writeConfigFile } from "~/command";
 import { AppContext } from "~/context";
 import {
@@ -31,8 +25,8 @@ const Settings = () => {
 
   createEffect(() => setLsarConfig(defaultConfig()));
 
-  onMount(async () => {
-    if (defaultConfig()?.player.path) return;
+  createEffect(async () => {
+    if (!defaultConfig() || defaultConfig()?.player.path !== "") return;
 
     const paths = await getPlayerPaths();
     if (!paths.length) return;
