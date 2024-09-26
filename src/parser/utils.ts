@@ -2,7 +2,7 @@ export const INVALID_INPUT = Error("无法从链接中获取房间号");
 export const WRONG_SECOND_LEVEL_DOMAIN = Error("域名不匹配");
 
 export const getSecondLevelDomain = (url: string) => {
-  const domainPart = url.split("://")[1];
+  const domainPart = url.split("?")[0].split("://")[1];
 
   const domainParts = domainPart.split(".");
 
