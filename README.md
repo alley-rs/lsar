@@ -12,6 +12,14 @@
 
 ![主界面](docs/images/lsar.avif)
 
+## 隐私收集
+
+本程序将会创建一个随机有 UUID 作为设备标识，用来统计本程序的打开次数，除此之外不会收集任何用户信息。
+
+统计打开次数的目的只为了统计活跃用户数量。
+
+用户无权拒绝本功能，但可以通过修改 hosts 文件的方式屏蔽 api 的网络请求，使用本程序时即意味着你已同意此项数据收集。
+
 ## 相关项目
 
 只列出主要的相关项目，涉及的其他功能性依赖请查看 [Cargo.toml](https://github.com/alley-rs/lsar/blob/main/src-tauri/Cargo.toml) 和 [package.json](https://github.com/alley-rs/lsar/blob/main/package.json)。
