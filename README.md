@@ -10,7 +10,9 @@
 
 软件很简单，不需要太多说明，启动后即可明白如何使用。
 
-![主界面](docs/images/lsar.avif)
+![主界面](docs/images/light.avif)
+
+![主界面](docs/images/dark.avif)
 
 ## 隐私收集
 
