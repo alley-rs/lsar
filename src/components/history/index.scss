@@ -6,10 +6,16 @@
   z-index: 2; /* 防止被底部关于栏覆盖 */
 
   .history-item {
+    --history-item-color-shadow: #00000085;
+
     background-color: rgba(0, 0, 0, 0.08);
     margin: 5px;
     padding: 5px;
     border-radius: 5px;
+
+    &:hover {
+      box-shadow: 0 0 5px 1px var(--history-item-color-shadow);
+    }
 
     .alley-divider-horizontal {
       margin: 4px 0;
@@ -33,6 +39,14 @@
 
     .empty {
       opacity: 0.5;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  #history {
+    .history-item {
+      --history-item-color-shadow: #ffffff2e;
     }
   }
 }
