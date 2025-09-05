@@ -5,21 +5,27 @@ description = "直播解析工具"
 authors = ["thep0y"]
 edition = "2021"
 
-[lib]
-name = "lsar_lib"
-crate-type = ["lib", "cdylib", "staticlib"]
-
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["macos-private-api"] }
-serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", default-features = false, features = [
+  "macos-private-api",
+  "wry",
+] }
+serde = { version = "1", default-features = false, features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["macros"] }
-time = { version = "0", features = ['macros', 'serde'] }
-tracing = { version = "0", features = ["log", "release_max_level_info"] }
-tracing-subscriber = { version = "0", features = [
+tokio = { version = "1", default-features = false, features = ["macros"] }
+time = { version = "0", default-features = false, features = [
+  'macros',
+  'serde',
+] }
+tracing = { version = "0", default-features = false, features = [
+  "log",
+  "release_max_level_info",
+] }
+tracing-subscriber = { version = "0", default-features = false, features = [
+  "fmt",
   'time',
   'env-filter',
   'json',
