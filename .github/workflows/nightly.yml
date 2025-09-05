@@ -1,0 +1,274 @@
+name: "Nightly Build"
+
+on:
+  schedule:
+    # 每天0点执行
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许手动触发
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check-nightly-conditions:
+    runs-on: ubuntu-22.04
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      has_nightly: ${{ steps.check.outputs.has_nightly }}
+      latest_commit: ${{ steps.check.outputs.latest_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check nightly build conditions
+        id: check
+        run: |
+          echo "Checking nightly build conditions..."
+          
+          # 检查是否存在nightly prerelease
+          if gh release view nightly >/dev/null 2>&1; then
+            echo "has_nightly=true" >> $GITHUB_OUTPUT
+            echo "Found existing nightly release"
+            
+            # 获取nightly标签的commit
+            nightly_commit=$(git rev-list -n 1 nightly 2>/dev/null || echo "")
+            if [ -n "$nightly_commit" ]; then
+              # 检查nightly标签之后是否有新的commit
+              latest_commit=$(git rev-parse HEAD)
+              echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+              
+              if [ "$nightly_commit" != "$latest_commit" ]; then
+                echo "New commits found after nightly tag"
+                echo "should_build=true" >> $GITHUB_OUTPUT
+              else
+                echo "No new commits after nightly tag"
+                echo "should_build=false" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "Nightly tag not found, will build"
+              echo "should_build=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "has_nightly=false" >> $GITHUB_OUTPUT
+            echo "No nightly release found"
+            
+            # 获取最新的正式release
+            latest_release=$(gh release list --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+            
+            if [ -n "$latest_release" ]; then
+              # 检查最新release之后是否有新的commit
+              release_commit=$(git rev-list -n 1 "$latest_release" 2>/dev/null || echo "")
+              latest_commit=$(git rev-parse HEAD)
+              echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+              
+              if [ "$release_commit" != "$latest_commit" ]; then
+                echo "New commits found after latest release $latest_release"
+                echo "should_build=true" >> $GITHUB_OUTPUT
+              else
+                echo "No new commits after latest release"
+                echo "should_build=false" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "No previous releases found, will build nightly"
+              latest_commit=$(git rev-parse HEAD)
+              echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+              echo "should_build=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  delete-existing-nightly:
+    runs-on: ubuntu-22.04
+    needs: check-nightly-conditions
+    if: needs.check-nightly-conditions.outputs.should_build == 'true' && needs.check-nightly-conditions.outputs.has_nightly == 'true'
+    steps:
+      - name: Delete existing nightly release and tag
+        run: |
+          echo "Deleting existing nightly release and tag..."
+          gh release delete nightly --cleanup-tag --yes
+          echo "Nightly release and tag deleted successfully"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-nightly-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    needs: [check-nightly-conditions, delete-existing-nightly]
+    if: always() && needs.check-nightly-conditions.outputs.should_build == 'true'
+    outputs:
+      release_id: ${{ steps.create-release.outputs.result }}
+      build_date: ${{ steps.date.outputs.date }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Create nightly release
+        id: create-release
+        uses: actions/github-script@v7
+        with:
+          retries: 3
+          script: |
+            const buildDate = '${{ steps.date.outputs.date }}';
+            const commitSha = '${{ needs.check-nightly-conditions.outputs.latest_commit }}'.substring(0, 7);
+            
+            const { data } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: 'nightly',
+              name: `Nightly Build ${buildDate}`,
+              body: `🌙 **Nightly Build**\n\n` +
+                    `**Build Date:** ${buildDate}\n` +
+                    `**Commit:** ${commitSha}\n\n` +
+                    `⚠️ This is a nightly build and may contain unstable features. Use at your own risk.\n\n` +
+                    `For stable releases, please check the [releases page](https://github.com/${context.repo.owner}/${context.repo.repo}/releases).`,
+              draft: true,
+              prerelease: true
+            });
+            return data.id;
+
+  build-nightly:
+    needs: [check-nightly-conditions, create-nightly-release]
+    if: needs.check-nightly-conditions.outputs.should_build == 'true'
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin"
+            rust-target: "aarch64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
+            rust-target: "x86_64-apple-darwin"
+          - platform: "ubuntu-22.04"
+            args: ""
+            rust-target: "x86_64-unknown-linux-gnu"
+          - platform: "windows-latest"
+            args: ""
+            rust-target: "x86_64-pc-windows-msvc"
+
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun
+            node_modules/
+          key: ${{ runner.os }}-frontend-nightly-${{ hashFiles('**/bun.lockb', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-nightly-
+            ${{ runner.os }}-frontend-
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/release/deps
+            src-tauri/target/release/build
+            src-tauri/target/${{ matrix.rust-target }}/release/deps
+            src-tauri/target/${{ matrix.rust-target }}/release/build
+          key: ${{ runner.os }}-${{ matrix.rust-target }}-rust-nightly-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.rust-target }}-rust-nightly-
+            ${{ runner.os }}-${{ matrix.rust-target }}-rust-
+
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build nightly application
+        uses: tauri-apps/tauri-action@v0
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.create-nightly-release.outputs.release_id }}
+          releaseBody: |
+            🌙 **Nightly Build ${{ needs.create-nightly-release.outputs.build_date }}**
+            
+            ⚠️ This is a nightly build and may contain unstable features.
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }}
+
+  publish-nightly:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    needs: [check-nightly-conditions, create-nightly-release, build-nightly]
+    if: needs.check-nightly-conditions.outputs.should_build == 'true'
+
+    steps:
+      - name: Publish nightly release
+        uses: actions/github-script@v7
+        env:
+          release_id: ${{ needs.create-nightly-release.outputs.release_id }}
+        with:
+          retries: 3
+          script: |
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+            });
+
+      - name: Create nightly summary
+        run: |
+          echo "## 🌙 Nightly Build Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Date:** ${{ needs.create-nightly-release.outputs.build_date }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release ID:** ${{ needs.create-nightly-release.outputs.release_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ needs.check-nightly-conditions.outputs.latest_commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Nightly Release](https://github.com/${{ github.repository }}/releases/tag/nightly)" >> $GITHUB_STEP_SUMMARY
+
+  skip-build:
+    runs-on: ubuntu-22.04
+    needs: check-nightly-conditions
+    if: needs.check-nightly-conditions.outputs.should_build == 'false'
+    steps:
+      - name: Skip nightly build
+        run: |
+          echo "## ⏭️ Nightly Build Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No new commits found since the last nightly build or release." >> $GITHUB_STEP_SUMMARY
+          echo "Nightly build is not needed at this time." >> $GITHUB_STEP_SUMMARY
