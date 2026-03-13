@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
+    "core:webview:allow-clear-all-browsing-data",
     "shell:allow-open",
     "clipboard-manager:allow-write-text",
     "dialog:allow-open",
@@ -13,4 +14,3 @@
     "dialog:allow-ask"
   ]
 }
-
