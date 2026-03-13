@@ -14,7 +14,7 @@ const BiliCookie = (props: BiliCookieProps) => {
       tips="不看 B 站直播无需配置此项。获取方法请自行搜索，互联网上教程很多。"
     >
       <LazyTextArea
-        rows={props.cookie ? 15 : 3}
+        rows={props.cookie ? 10 : 3}
         value={props.cookie}
         onChange={props.onChange}
       />
