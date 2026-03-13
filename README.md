@@ -45,4 +45,4 @@
 只列出主要的相关项目，涉及的其他功能性依赖请查看 [Cargo.toml](https://github.com/alley-rs/lsar/blob/main/src-tauri/Cargo.toml) 和 [package.json](https://github.com/alley-rs/lsar/blob/main/package.json)。
 
 - [tauri](https://github.com/tauri-apps/tauri)：图形化的基础框架。
-- [alley-components](https://github.com/alley-rs/alley-components): 页面组件库。
+- [fluent-solid](https://github.com/thep0y/fluent): 页面组件库。
