@@ -9,6 +9,7 @@ import { Drawer } from "../drawer/Drawer";
 import DarkMode from "./components/DarkMode";
 import PlayerPath from "./components/PlayerPath";
 import BiliCookie from "./components/BiliCookie";
+import Cache from "./components/Cache";
 
 import { useToast } from "fluent-solid";
 import { useConfigContext } from "~/contexts/ConfigContext";
@@ -126,6 +127,8 @@ const Settings = () => {
             )
           }
         />
+
+        <Cache />
 
         <div class={styles.buttons}>
           <LazyButton onClick={onCancel} disabled={!lsarConfig()?.player.path}>

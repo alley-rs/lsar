@@ -4,8 +4,6 @@ import type { FieldProps } from "fluent-solid";
 
 import { LazyField } from "~/lazy";
 
-import * as styles from "./index.css";
-
 interface SettingItemProps {
   label: string;
   children: JSX.Element;
@@ -22,7 +20,8 @@ const SettingItem = (props: SettingItemProps) => {
   return (
     <LazyField
       orientation={merged.orientation}
-      label={{ children: props.label, class: styles.label }}
+      // label={{ children: props.label, class: styles.label }}
+      label={props.label}
       validationMessage={merged.tips}
     >
       {props.children}

@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod cache;
 mod config;
 mod data;
 mod error;
@@ -26,6 +27,7 @@ use std::env;
 
 use tauri::{AppHandle, Manager};
 
+use crate::cache::calc_cache_size;
 use crate::config::{read_config_file, write_config_file};
 use crate::data::db::{delete_a_history_by_id, get_all_history, insert_a_history};
 use crate::error::LsarResult;
@@ -118,6 +120,7 @@ fn main() {
             parse_bilibili,
             parse_yy,
             get_player_paths,
+            calc_cache_size,
             #[cfg(windows)]
             set_titlebar_color_mode
         ])
