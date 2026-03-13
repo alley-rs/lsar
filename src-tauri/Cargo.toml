@@ -14,11 +14,11 @@ tauri = { version = "2", default-features = false, features = [
   "wry",
 ] }
 serde = { version = "1", default-features = false, features = ["derive"] }
-serde_json = "1"
+serde_json = { version = "1", default-features = false, features = [] }
 tokio = { version = "1", default-features = false, features = ["macros"] }
 time = { version = "0", default-features = false, features = [
-  'macros',
-  'serde',
+  "macros",
+  "serde",
 ] }
 tracing = { version = "0", default-features = false, features = [
   "log",
@@ -30,7 +30,7 @@ tracing-subscriber = { version = "0", default-features = false, features = [
   'env-filter',
   'json',
 ] }
-thiserror = "2"
+thiserror = { version = "2", default-features = false }
 sqlx = { version = "0", default-features = false, features = [
   "macros",
   "runtime-tokio",
@@ -39,19 +39,22 @@ sqlx = { version = "0", default-features = false, features = [
 ] }
 dirs = "6"
 md-5 = "0"
-reqwest = { version = "0", default-features = false, features = ["json", "form"] }
-toml = "0"
-open = "5"
+reqwest = { version = "0", default-features = false, features = [
+  "json",
+  "form",
+] }
+toml = { version = "0", default-features = false }
+open = { version = "5", default-features = false }
 os_info = { version = "3", default-features = false }
 regex = { version = "1", default-features = false }
-url = "2"
+url = { version = "2", default-features = false }
 rand = { version = "0", default-features = false, features = [
   "std",
   # "std_rng",
   "thread_rng",
 ] }
-base64 = "0"
-bytes = "1"
+base64 = { version = "0", default-features = false }
+bytes = { version = "1", default-features = false }
 # sm3 = "0.4.2" # 抖音 a_bogus 需要
 
 tauri-plugin-shell = "2"
