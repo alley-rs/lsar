@@ -37,13 +37,13 @@ sqlx = { version = "0", default-features = false, features = [
   "sqlite",
   "time",
 ] }
-dirs = "6"
-md-5 = "0"
+dirs = { version = "6", default-features = false }
+md-5 = { version = "0", default-features = false }
 reqwest = { version = "0", default-features = false, features = [
   "json",
   "form",
 ] }
-toml = { version = "0", default-features = false }
+toml = { version = "1", default-features = false, features = [ "display", "parse", "serde" ] }
 open = { version = "5", default-features = false }
 os_info = { version = "3", default-features = false }
 regex = { version = "1", default-features = false }
