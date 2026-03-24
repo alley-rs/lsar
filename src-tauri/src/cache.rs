@@ -32,7 +32,14 @@ pub fn calc_cache_size() -> LsarResult<String> {
             std::io::ErrorKind::NotFound,
             "cache dir not found",
         ))?
-        .join("lsar");
+        .join(if cfg!(target_os = "macos") {
+            "lsar"
+        } else if cfg!(target_os = "windows") {
+            "com.alley.lsar/EBWebView"
+        } else {
+            // FIXME: Linux 没有测试条件，暂不支持
+            unimplemented!()
+        });
 
     let total = Arc::new(AtomicU64::new(0));
     walk_parallel(&path, Arc::clone(&total))?;
