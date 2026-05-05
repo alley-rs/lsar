@@ -38,7 +38,11 @@ pub fn calc_cache_size() -> LsarResult<String> {
             "com.alley.lsar/EBWebView"
         } else {
             // FIXME: Linux 没有测试条件，暂不支持
-            unimplemented!()
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "unsupported platform",
+            )
+            .into());
         });
 
     let total = Arc::new(AtomicU64::new(0));
