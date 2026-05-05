@@ -10,48 +10,52 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", default-features = false, features = [
-  "macos-private-api",
-  "wry",
+    "macos-private-api",
+    "wry",
 ] }
 serde = { version = "1", default-features = false, features = ["derive"] }
 serde_json = { version = "1", default-features = false, features = [] }
 tokio = { version = "1", default-features = false, features = ["macros"] }
 time = { version = "0", default-features = false, features = [
-  "macros",
-  "serde",
+    "macros",
+    "serde",
 ] }
 tracing = { version = "0", default-features = false, features = [
-  "log",
-  "release_max_level_info",
+    "log",
+    "release_max_level_info",
 ] }
 tracing-subscriber = { version = "0", default-features = false, features = [
-  "fmt",
-  'time',
-  'env-filter',
-  'json',
+    "fmt",
+    'time',
+    'env-filter',
+    'json',
 ] }
 thiserror = { version = "2", default-features = false }
 sqlx = { version = "0", default-features = false, features = [
-  "macros",
-  "runtime-tokio",
-  "sqlite",
-  "time",
+    "macros",
+    "runtime-tokio",
+    "sqlite",
+    "time",
 ] }
 dirs = { version = "6", default-features = false }
 md-5 = { version = "0", default-features = false }
 reqwest = { version = "0", default-features = false, features = [
-  "json",
-  "form",
+    "json",
+    "form",
 ] }
-toml = { version = "1", default-features = false, features = [ "display", "parse", "serde" ] }
+toml = { version = "1", default-features = false, features = [
+    "display",
+    "parse",
+    "serde",
+] }
 open = { version = "5", default-features = false }
 os_info = { version = "3", default-features = false }
 regex = { version = "1", default-features = false }
 url = { version = "2", default-features = false }
 rand = { version = "0", default-features = false, features = [
-  "std",
-  # "std_rng",
-  "thread_rng",
+    "std",
+    # "std_rng",
+    "thread_rng",
 ] }
 base64 = { version = "0", default-features = false }
 bytes = { version = "1", default-features = false }
@@ -63,22 +67,22 @@ tauri-plugin-dialog = "2"
 tauri-plugin-process = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-single-instance = "2.3"
+tauri-plugin-single-instance = "2"
 tauri-plugin-updater = { version = "2", default-features = false, features = [
-  "native-tls",
-  "zip",
+    "native-tls",
+    "zip",
 ] }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.61", features = [
-  "Win32_System_Registry",
-  "Win32_System_Diagnostics_ToolHelp",
-  "Win32_System_ProcessStatus",
-  "Win32_Graphics_Dwm",
-  "Wdk_System_SystemServices",
-  "Win32_System_SystemInformation",
-  "Win32_Globalization",
-  "Win32_System_Threading",
+    "Win32_System_Registry",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_ProcessStatus",
+    "Win32_Graphics_Dwm",
+    "Wdk_System_SystemServices",
+    "Win32_System_SystemInformation",
+    "Win32_Globalization",
+    "Win32_System_Threading",
 ] }
 
 [features]
