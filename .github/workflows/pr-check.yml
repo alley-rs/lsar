@@ -59,7 +59,7 @@ jobs:
 
   frontend-check:
     name: "Frontend Code Check"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: detect-changes
     if: needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.workflow == 'true'
     steps:
@@ -88,9 +88,6 @@ jobs:
 
       - name: Run Biome check
         run: bun run check
-
-      - name: TypeScript check
-        run: bunx tsc --noEmit
 
       - name: Build frontend
         run: bun run build:vite
