@@ -10,7 +10,7 @@
     "serve": "vite preview",
     "tauri": "tauri",
     "start:dev": "cross-env RUST_BACKTRACE=1 tauri dev --features log-color",
-    "check": "tsc --noEmit && biome check",
+    "check": "tsc --noEmit && biome check --write src",
     "dev": "bun run start:dev"
   },
   "license": "MIT",
