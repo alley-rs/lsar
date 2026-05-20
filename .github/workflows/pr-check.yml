@@ -132,8 +132,12 @@ jobs:
             ~/.cargo/git/db/
             src-tauri/target/release/deps
             src-tauri/target/release/build
+            src-tauri/target/debug/deps
+            src-tauri/target/debug/build
             src-tauri/target/${{ matrix.rust-target }}/release/deps
             src-tauri/target/${{ matrix.rust-target }}/release/build
+            src-tauri/target/${{ matrix.rust-target }}/debug/deps
+            src-tauri/target/${{ matrix.rust-target }}/debug/build
           key: ${{ runner.os }}-${{ matrix.rust-target }}-rust-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.rust-target }}-rust-
