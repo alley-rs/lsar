@@ -31,7 +31,7 @@
     "@types/node": "^26.0.0",
     "@vanilla-extract/vite-plugin": "^5.2.2",
     "cross-env": "^10.1.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.0.13",
     "vite-plugin-solid": "^2.11.12"
   }
