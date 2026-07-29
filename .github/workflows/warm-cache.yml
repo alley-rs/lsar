@@ -1,0 +1,89 @@
+name: "Cache Warming"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src-tauri/Cargo.toml"
+      - "src-tauri/Cargo.lock"
+      - "package.json"
+      - "bun.lockb"
+  workflow_dispatch:
+
+jobs:
+  warm-frontend-cache:
+    name: "Warm Frontend Cache"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun
+            node_modules/
+          key: ${{ runner.os }}-frontend-${{ hashFiles('**/bun.lockb', '**/package.json') }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+  warm-rust-cache:
+    name: "Warm Rust Cache"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin"
+            rust-target: "aarch64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
+            rust-target: "x86_64-apple-darwin"
+          - platform: "ubuntu-24.04"
+            args: ""
+            rust-target: "x86_64-unknown-linux-gnu"
+          - platform: "windows-latest"
+            args: ""
+            rust-target: "x86_64-pc-windows-msvc"
+    runs-on: ${{ matrix.platform }}
+
+    defaults:
+      run:
+        working-directory: ./src-tauri
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        id: rust-toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            src-tauri/target/debug/.fingerprint
+            src-tauri/target/debug/deps
+            src-tauri/target/debug/build
+          key: ${{ runner.os }}-rust-debug-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build caches
+        run: |
+          cargo fetch
+          cargo build --tests
+          cargo clippy --all-targets -- -D warnings
