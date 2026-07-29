@@ -54,10 +54,6 @@ jobs:
             rust-target: "x86_64-pc-windows-msvc"
     runs-on: ${{ matrix.platform }}
 
-    defaults:
-      run:
-        working-directory: ./src-tauri
-
     steps:
       - uses: actions/checkout@v4
 
@@ -89,7 +85,8 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Build caches
+        working-directory: ./src-tauri
         run: |
           cargo fetch
-          cargo build --tests
-          cargo clippy --all-targets -- -D warnings
+          cargo build --tests --target ${{ matrix.rust-target }}
+          cargo clippy --target ${{ matrix.rust-target }} -- -D warnings

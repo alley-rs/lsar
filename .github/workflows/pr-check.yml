@@ -71,7 +71,7 @@ jobs:
           bun-version: latest
 
       - name: Cache frontend dependencies
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             ~/.bun
@@ -118,29 +118,29 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
+        id: rust-toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.rust-target }}
 
+      - name: Cache cargo registry
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
       - name: Cache Rust dependencies
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/release/deps
-            src-tauri/target/release/build
+            src-tauri/target/debug/.fingerprint
             src-tauri/target/debug/deps
             src-tauri/target/debug/build
-            src-tauri/target/${{ matrix.rust-target }}/release/deps
-            src-tauri/target/${{ matrix.rust-target }}/release/build
-            src-tauri/target/${{ matrix.rust-target }}/debug/deps
-            src-tauri/target/${{ matrix.rust-target }}/debug/build
-          key: ${{ runner.os }}-${{ matrix.rust-target }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-rust-debug-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.rust-target }}-rust-
+            ${{ runner.os }}-rust-debug-
 
       - name: Cache system dependencies
         if: matrix.platform == 'ubuntu-24.04'
@@ -169,14 +169,9 @@ jobs:
         working-directory: ./src-tauri
         run: cargo test --target ${{ matrix.rust-target }}
 
-      - name: Cargo build
-        working-directory: ./src-tauri
-        run: cargo build --target ${{ matrix.rust-target }}
-
-  # 自动合并PR
   auto-merge:
     name: "Auto Merge PR"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [detect-changes, frontend-check, rust-check]
     if: always() && !cancelled() && !failure()
     permissions:
