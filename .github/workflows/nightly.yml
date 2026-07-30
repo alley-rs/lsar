@@ -46,7 +46,7 @@ jobs:
             local since_commit=$1
             local commits=$(git rev-list --reverse "$since_commit"..HEAD 2>/dev/null || git rev-list --reverse HEAD)
             local labeled_commits=""
-            
+
             for commit in $commits; do
               if has_labels "$commit"; then
                 if [ -z "$labeled_commits" ]; then
@@ -56,7 +56,7 @@ jobs:
                 fi
               fi
             done
-            
+
             echo "$labeled_commits"
           }
 
@@ -110,7 +110,7 @@ jobs:
               labeled_commits=$(get_labeled_commits_since "")
               latest_commit=$(git rev-parse HEAD)
               echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
-              
+
               if [ -n "$labeled_commits" ]; then
                 echo "Found labeled commits, will build nightly: $labeled_commits"
                 echo "should_build=true" >> $GITHUB_OUTPUT
@@ -215,42 +215,49 @@ jobs:
         with:
           node-version: lts/*
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Cache frontend dependencies
-        uses: actions/cache@v4
+        uses: actions/restore@v5
         with:
           path: |
             ~/.bun
             node_modules/
-          key: ${{ runner.os }}-frontend-nightly-${{ hashFiles('**/bun.lockb', '**/package.json') }}
+          key: ${{ runner.os }}-frontend-${{ hashFiles('**/bun.lockb', '**/package.json') }}
           restore-keys: |
-            ${{ runner.os }}-frontend-nightly-
             ${{ runner.os }}-frontend-
+
+      - name: Setup Biome CLI
+        uses: biomejs/setup-biome@v2
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.rust-target }}
 
+      - name: Cache cargo registry
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
       - name: Cache Rust dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
+            src-tauri/target/release/.fingerprint
             src-tauri/target/release/deps
             src-tauri/target/release/build
+            src-tauri/target/${{ matrix.rust-target }}/release/.fingerprint
             src-tauri/target/${{ matrix.rust-target }}/release/deps
             src-tauri/target/${{ matrix.rust-target }}/release/build
-          key: ${{ runner.os }}-${{ matrix.rust-target }}-rust-nightly-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-rust-release-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.rust-target }}-rust-nightly-
-            ${{ runner.os }}-${{ matrix.rust-target }}-rust-
+            ${{ runner.os }}-rust-release-
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-24.04'
