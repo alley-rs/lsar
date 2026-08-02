@@ -322,7 +322,7 @@
 
     "@vanilla-extract/sprinkles": ["@vanilla-extract/sprinkles@1.6.5", "https://registry.npmmirror.com/@vanilla-extract/sprinkles/-/sprinkles-1.6.5.tgz", { "peerDependencies": { "@vanilla-extract/css": "^1.0.0" } }, "sha512-HOYidLONR/SeGk8NBAeI64I4gYdsMX9vJmniL13ZcLVwawyK0s2GUENEAcGA+GYLIoeyQB61UqmhqPodJry7zA=="],
 
-    "@vanilla-extract/vite-plugin": ["@vanilla-extract/vite-plugin@5.2.5", "https://registry.npmmirror.com/@vanilla-extract/vite-plugin/-/vite-plugin-5.2.5.tgz", { "dependencies": { "@vanilla-extract/compiler": "^0.7.2", "@vanilla-extract/integration": "^8.0.10" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-V397a7qKqQskExW6TkjGnp5czp7sFd8cGTsnf44jsfyCXNcdJLWAKqJnSaFrW0bemp1W1OLg/cVkfl8qc0FLRw=="],
+    "@vanilla-extract/vite-plugin": ["@vanilla-extract/vite-plugin@5.2.6", "https://registry.npmmirror.com/@vanilla-extract/vite-plugin/-/vite-plugin-5.2.6.tgz", { "dependencies": { "@vanilla-extract/compiler": "^0.7.2", "@vanilla-extract/integration": "^8.0.10" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-mGk0YEan+NyeoxEO51LfxOdtw2JBI+Yb840FGg+zvG6tVU3YfDgKGPiGuk5oT8jqzfsm7H89DyjOVCpl6Bnn0w=="],
 
     "acorn": ["acorn@8.15.0", "https://registry.npmmirror.com/acorn/-/acorn-8.15.0.tgz", { "bin": { "acorn": "bin/acorn" } }, "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg=="],
 
